@@ -10,7 +10,7 @@ class Function:
     '''
     def __call__(self, input: Variable):
         x = input.data # 데이터를 꺼낸다
-        y = self.forward(x) # 구체적인 계산은 forward 메서드에서 한다.
+        y = self.forward(x) # 호출되면 forward 함수가 적용됨. 구체적인 계산은 forward 메서드에서 한다.
         output = Variable(y)
         return output
 
