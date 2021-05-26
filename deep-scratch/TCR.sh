@@ -1,2 +1,2 @@
 #!/bin/sh
-(python test.py && (git add . && git commit -am working)) || git reset --hard
+(python test.py && (git add . && git commit -am "TCR working")) || git reset --hard
