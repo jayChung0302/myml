@@ -8,6 +8,6 @@
 # 손실함수의 각 매개변수에 대한 미분을 계산
 # 역전파 시 미분 값에 순전파에서 계산된 값이 필요하게 됨 (메모리에 저장)
 # weight term 의 backprop 에서 activation 이 들어감
-# bias term 의 backprop 시엔 activation term 이 필요하진 않음
+# bias term 의 backprop 시엔 activation term 이 필요하진 않음 
 
 import numpy as np
