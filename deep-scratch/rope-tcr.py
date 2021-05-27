@@ -28,7 +28,7 @@ class Substring:
         self.length = length
 
     def __str__(self):
-        return "BC"
+        return str(self.rope)[self.start:self.start+self.length]
 
 assert str(to_rope("ABC")) == "ABC"
-assert str(to_rope("ABCDE").substring(1, 3)) == "BC"
+assert str(to_rope("ABCDE").substring(1, 3)) == "BCD"
