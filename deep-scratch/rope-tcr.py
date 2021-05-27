@@ -1,11 +1,11 @@
 # Rope data structure
 # add very large string, how can you insert single character into the middle of it in constant time?
 
-# todo
+#TODO
 # insert
 # delete
-# substring
-# concatenation
+# substring # done
+# concatenation # done
 
 # API
 def to_rope(string):
@@ -34,12 +34,12 @@ class Substring(Rope):
         return str(self.rope)[self.start :  self.start + self.length]
 
 class Concatenation(Rope):
-    def __init__(self, rope, right):
-        self.rope = rope
+    def __init__(self, left, right):
+        self.left = left
         self.right = right
 
     def __str__(self):
-        return self.rope.string + self.right.string
+        return self.left.string + self.right.string
 
 assert str(to_rope("ABC")) == "ABC"
 assert str(to_rope("ABCDE").substring(1, 3)) == "BCD"
