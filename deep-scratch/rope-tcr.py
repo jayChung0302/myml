@@ -18,10 +18,13 @@ class Rope:
     def  __str__(self):
         return self.string
 
-    def substring(self, start, end):
-        return Substring()
+    def substring(self, start, length):
+        return Substring(self, start, length)
 
 class Substring:
+    def __init__(self, rope, start, length):
+        pass
+    
     def __str__(self):
         return "BC"
 
