@@ -88,6 +88,20 @@ def add(x0, x1):
     f = Add()
     return f(x0, x1)
 
+class Square(Function):
+    def forward(self, x):
+        y = x ** 2
+        return y
+    
+    def backward(self, gy):
+        x = self.inputs[0].data # 수정 전: x = self.input.data
+        gx = 2 * x * gy
+        return gx
+
+def square(x):
+    f = Square()
+    return f(x)
+
 def as_array(x):
         if np.isscalar(x):
             return np.array(x)
@@ -106,3 +120,14 @@ if __name__ == '__main__':
     print([f.generation for f in funcs])
     f = funcs.pop()
     print(f.generation)
+
+    # 안되던 계산 그래프 해보기
+    # y = x^2^2 + x^2^2 = 2x^4
+    x = Variable(np.array(2.0))
+    a = square(x)
+    y = add(square(a), square(a))
+    y.backward()
+    
+    print(y.data)
+    print(x.grad)
+    

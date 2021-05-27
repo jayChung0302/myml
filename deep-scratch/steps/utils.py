@@ -1,5 +1,7 @@
 import numpy as np
 from typing import ClassVar
+import weakref
+import contextlib
 
 def as_array(x):
         if np.isscalar(x):
@@ -15,18 +17,30 @@ class Variable:
         self.data = data
         self.creator = None
         self.grad = None
+        self.generation = 0
     
     def set_creator(self, func):
         self.creator = func
+        self.generation = func.generation + 1
 
-    def backward(self):
+    def backward(self, retain_grad=False):
         if self.grad is None:
             self.grad = np.ones_like(self.data)
-        
-        funcs = [self.creator]
+        funcs = []
+        seen_set = set()
+
+        def add_func(f):
+            if f not in seen_set:
+                funcs.append(f)
+                seen_set.add(f)
+                funcs.sort(key=lambda x:x.generation)
+
+        add_func(self.creator)
+
         while funcs:
             f = funcs.pop()
-            gys = [output.grad for output in f.outputs]
+            # gys = [output.grad for output in f.outputs]
+            gys = [output().grad for output in f.outputs]
             gxs = f.backward(*gys)
             if not isinstance(gxs, tuple):
                 gxs = (gxs,)
@@ -39,22 +53,36 @@ class Variable:
                     x.grad = x.grad + gx
                 
                 if x.creator is not None:
-                    funcs.append(x.creator)
+                    # funcs.append(x.creator)
+                    add_func(x.creator)
+            if not retain_grad:
+                for y in f.outputs:
+                    y().grad = None # y 는 약한 참조(weakref)
+
+    def cleargrad(self):
+        self.grad = None
             
+class Config:
+    # 설정 데이터는 단 한 군데에만 존재하는게 좋음. 따라서 클래스를 인스턴스화 하지 않고 클래스 상태 그대로 이용
+    enable_backprop = True
+
 class Function:
-    def __call__(self, *inputs): # * 붙인다. 리스트를 사용하는 대신 임의 개수의 인수를 건네 함수 호출 가능.
+    def __call__(self, *inputs):
         xs = [x.data for x in inputs]
-        ys = self.forward(*xs) # 별표를 붙여 unpack
-        if not isinstance(ys, tuple): # tuple 인스턴스가 아닐 경우 추가 지원
+        ys = self.forward(*xs)
+        if not isinstance(ys, tuple):
             ys = (ys,)
         outputs = [Variable(as_array(y)) for y in ys]
-        
-        for output in outputs:
-            output.set_creator(self)
-        self.inputs = inputs
-        self.outputs = outputs
+        if Config.enable_backprop:
+            self.generation = max([x.generation for x in inputs]) # 세대 설정
+            for output in outputs:
+                output.set_creator(self) # 연결 설정
+            self.inputs = inputs
+            # self.outputs = outputs
+            self.outputs = [weakref.ref(output) for output in outputs] # 약한참조로 해결
+
         return outputs if len(outputs) > 1 else outputs[0]
-        # 리스트의 원소가 하나라면 첫 번째 원소를 반환 (list 벗기기)
+
     def forward(self):
         raise NotImplementedError
     
@@ -65,6 +93,17 @@ class Function:
 # 동적 계산 그래프(Dynamic computational graph) 는 실제 계산이 이뤄질 때 변수에 관련 '연결'을 기록하는 방식으로 만들어짐.
 # -> PyTorch, Chainer 도 비슷한 방식
 
+@contextlib.contextmanager
+def using_config(name: str, value: bool):
+    old_value = getattr(Config, name)
+    setattr(Config, name, value)
+    try:
+        yield
+    finally:
+        setattr(Config, name, old_value)
+
+def no_grad():
+        return using_config('enable_backprop', False)
 class Add(Function): # Function 에서 unpack 및 tuple 아닐 경우 튜플화로 구현했기 때문에
     def forward(self, x0, x1): # 이렇게 간결히 짤 수 있음.
         y = x0 + x1
