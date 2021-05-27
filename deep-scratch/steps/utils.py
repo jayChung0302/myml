@@ -8,17 +8,32 @@ def as_array(x):
             return np.array(x)
         return x
 
-# 재귀에서 반복문으로
 class Variable:
-    def __init__(self, data):
+    def __init__(self, data, name=None): # name 지정
         if data is not None:
             if not isinstance(data, np.ndarray):
                 raise TypeError(f'{type(data)} type is not available.')
         self.data = data
+        self.name = name
         self.creator = None
         self.grad = None
         self.generation = 0
     
+    def __len__(self):
+        return len(self.data)
+    
+    def __repr__(self):
+        if self.data is None:
+            return 'variable(None)'
+        p = str(self.data).replace('\n', '\n' + ' ' * 9)
+        return 'variable(' + p +')'
+    
+    def __mul__(self, other):
+        return mul(self, other)
+    
+    def __add__(self, other):
+        return add(self, other)
+
     def set_creator(self, func):
         self.creator = func
         self.generation = func.generation + 1
@@ -61,6 +76,22 @@ class Variable:
 
     def cleargrad(self):
         self.grad = None
+    
+    @property
+    def shape(self):
+        return self.data.shape
+    
+    @property
+    def ndim(self):
+        return self.data.ndim
+    
+    @property
+    def size(self):
+        return self.data.size
+
+    @property
+    def dtype(self):
+        return self.data.dtype
             
 class Config:
     # 설정 데이터는 단 한 군데에만 존재하는게 좋음. 따라서 클래스를 인스턴스화 하지 않고 클래스 상태 그대로 이용
@@ -112,6 +143,15 @@ class Add(Function): # Function 에서 unpack 및 tuple 아닐 경우 튜플화�
     def backward(self, gy):
         return gy, gy # 덧셈의 미분값은 1이므로 상위 노드에서의 gradient 가 그대로 전달된다.
 
+class Mul(Function):
+    def forward(self, x0, x1):
+        y = x0 * x1
+        return y
+    
+    def backward(self, gy):
+        x0, x1 = self.inputs[0].data, self.inputs[1].data
+        return gy * x1, gy * x0
+
 class Square(Function):
     def forward(self, x):
         y = x ** 2
@@ -135,7 +175,11 @@ class Exp(Function):
 def add(x0, x1):
     f = Add()
     return f(x0, x1)
-    
+
+def mul(x0, x1):
+    f = Mul()
+    return f(x0, x1)
+
 def square(x):
     f = Square()
     return f(x)

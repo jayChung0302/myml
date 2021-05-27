@@ -1,5 +1,20 @@
-# 변수 이름 지정
+# 연산자 오버로드
+
 import numpy as np
+from utils import *
+
+class Mul(Function):
+    def forward(self, x0, x1):
+        y = x0 * x1
+        return y
+    
+    def backward(self, gy):
+        x0, x1 = self.inputs[0].data, self.inputs[1].data
+        return gy * x1, gy * x0
+
+def mul(x0, x1):
+    f = Mul()
+    return f(x0, x1)
 
 class Variable:
     def __init__(self, data, name=None): # name 지정
@@ -20,6 +35,12 @@ class Variable:
             return 'variable(None)'
         p = str(self.data).replace('\n', '\n' + ' ' * 9)
         return 'variable(' + p +')'
+    
+    def __mul__(self, other):
+        return mul(self, other)
+    
+    def __add__(self, other):
+        return add(self, other)
 
     def set_creator(self, func):
         self.creator = func
@@ -80,16 +101,16 @@ class Variable:
     def dtype(self):
         return self.data.dtype
 
-
 if __name__ == '__main__':
-    x = Variable(np.array([1,2,3,]))
-    print(len(x))
-
-    x = Variable(None)
-    print(x)
-
-    x = Variable(np.array([[1,2,3,],[4,5,6]]))
-    print(x)
-
-    print(len(x))
+    a = Variable(np.array(3.0))
+    b = Variable(np.array(2.0))
+    c = Variable(np.array(1.0))
     
+    # y = add(mul(a, b), c) # 귀찮
+    y = a * b + c # 연산자 오버로드 후
+    
+    y.backward()
+
+    print(y)
+    print(a.grad)
+    print(b.grad)
