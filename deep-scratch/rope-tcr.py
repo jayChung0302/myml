@@ -22,7 +22,7 @@ class String(Rope):
     def  __str__(self):
         return self.string
         
-class Substring:
+class Substring(Rope):
     def __init__(self, rope, start, length):
         self.rope = rope
         self.start = start
@@ -34,3 +34,4 @@ class Substring:
 
 assert str(to_rope("ABC")) == "ABC"
 assert str(to_rope("ABCDE").substring(1, 3)) == "BCD"
+assert str(to_rope("ABCDE").substring(1, 3).substring(1,1)) == "C"
