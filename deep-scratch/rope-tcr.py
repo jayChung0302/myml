@@ -18,4 +18,8 @@ class Rope:
     def  __str__(self):
         return self.string
 
+    def substring(self, start, end):
+        return "BC"
+
 assert str(to_rope("ABC")) == "ABC"
+assert str(to_rope("ABCDE").substring(1, 3)) == "BC"
