@@ -1,2 +1,2 @@
 #!/bin/sh
-(python test.py && (git add . && git commit -am "TCR wip")) || git reset --hard 
+(python rope-tcr.py && (git add . && git commit -am "TCR wip")) || git reset --hard 
