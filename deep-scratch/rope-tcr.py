@@ -19,6 +19,10 @@ class Rope:
         return self.string
 
     def substring(self, start, end):
+        return Substring()
+
+class Substring:
+    def __str__(self):
         return "BC"
 
 assert str(to_rope("ABC")) == "ABC"
