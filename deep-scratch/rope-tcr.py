@@ -37,9 +37,9 @@ class Concatenation(Rope):
     def __init__(self, rope, right):
         self.rope = rope
         self.right = right
-        
+
     def __str__(self):
-        return "ABCDE"
+        return self.rope.string + self.right.string
 
 assert str(to_rope("ABC")) == "ABC"
 assert str(to_rope("ABCDE").substring(1, 3)) == "BCD"
