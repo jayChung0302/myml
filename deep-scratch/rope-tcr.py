@@ -27,6 +27,9 @@ class String(Rope):
     
     def  __str__(self):
         return self.string
+    
+    def length(self):
+        return len(self.string)
         
 class Substring(Rope):
     def __init__(self, rope, start, leng):
