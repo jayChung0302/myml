@@ -34,7 +34,10 @@ class Rope:
         if type(index) == int:
             return self.__get_single_item__(index)
         return Substring(self, index.start, index.stop - index.start)
-        
+    
+    def __get_single_item__(self, index):
+        raise Exception("should have been overriden")
+
 class String(Rope):
     def __init__(self, string):
         self.string = string
@@ -46,7 +49,7 @@ class String(Rope):
         return len(self.string)
     
     def __get_single_item__(self, index):
-        return "D"
+        return self.string[index]
         
 class Substring(Rope):
     def __init__(self, rope, start, leng):
