@@ -33,8 +33,9 @@ class Rope:
     def __add__(self, addend):
         return Concatenation(self, addend)
     
-    def __getitem__(self, param):
-        return param
+    def __getitem__(self, slice):
+        print(slice)
+        return self.substring(slice.start, slice.stop - slice.start)
 
 class String(Rope):
     def __init__(self, string):
