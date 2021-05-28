@@ -96,4 +96,4 @@ equals(len(to_rope("ABCDE").substring(1,3)), "3")
 equals(len(to_rope("ABC") + to_rope("DE")), "5")
 equals(to_rope("ABE").insert(to_rope("CD"), 2), "ABCDE")
 
-to_rope("ABCDE")[1:2]
+print(to_rope("ABCDE")[1:2])
