@@ -3,7 +3,7 @@
 
 #TODO
 # [] notation
-# len() function
+# len() function # done
 # + for concatenation
 # insert # done
 # delete # done
@@ -31,6 +31,9 @@ class Rope:
     
     def __len__(self):
         raise Exception("should have been overriden")
+
+    def __add__(self, addend):
+        return self.concatenate(addend)
 
 class String(Rope):
     def __init__(self, string):
