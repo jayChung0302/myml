@@ -20,6 +20,9 @@ class Rope:
     
     def delete(self, start, length):
         return Deletion(self, start, length)
+    
+    def insert(self, rope, start):
+        pass
 
 class String(Rope):
     def __init__(self, string):
@@ -78,4 +81,4 @@ equals(to_rope("ABC").concatenate(to_rope("DE")), "ABCDE")
 equals(to_rope("ABCDE").delete(1, 3), "AE")
 equals(to_rope("ABCDE").substring(1,3).length(), "3")
 equals(to_rope("ABC").concatenate(to_rope("DE")).length(), "5")
-
+# equals(to_rope("ABE").insert(to_rope("CD"), 2), "ABCDE")
