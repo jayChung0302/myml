@@ -30,8 +30,10 @@ class Rope:
     def __add__(self, addend):
         return Concatenation(self, addend)
     
-    def __getitem__(self, slice):
-        return Substring(self, slice.start, slice.stop - slice.start)
+    def __getitem__(self, index):
+        if type(index) == int:
+            pass
+        return Substring(self, index.start, index.stop - index.start)
 class String(Rope):
     def __init__(self, string):
         self.string = string
@@ -91,3 +93,6 @@ equals(to_rope("ABCDE").delete(1, 3), "AE")
 equals(len(to_rope("ABCDE")[1:4]), "3")
 equals(len(to_rope("ABC") + to_rope("DE")), "5")
 equals(to_rope("ABE").insert(to_rope("CD"), 2), "ABCDE")
+
+# equals(to_rope("ABCDE")[3], "D")
+# equals((to_rope("ABC") + to_rope("DE"))[3], "D")
