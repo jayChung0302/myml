@@ -32,10 +32,13 @@ class Substring(Rope):
     def __init__(self, rope, start, leng):
         self.rope = rope
         self.start = start
-        self.length = leng
+        self.leng = leng
 
     def __str__(self):
-        return str(self.rope)[self.start :  self.start + self.length]
+        return str(self.rope)[self.start :  self.start + self.leng]
+    
+    def length(self):
+        return self.leng
 
 class Concatenation(Rope):
     def __init__(self, left, right): # left: rope
@@ -49,10 +52,10 @@ class Deletion(Rope):
     def __init__(self, rope, start, leng):
         self.rope = rope
         self.start = start
-        self.length = leng
+        self.leng = leng
 
     def __str__(self):
-        return str(self.rope)[:self.start] + str(self.rope)[self.start + self.length:]
+        return str(self.rope)[:self.start] + str(self.rope)[self.start + self.leng:]
 
 # Testing Framework
 def equals(rope, expected):
