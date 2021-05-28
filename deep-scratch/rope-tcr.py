@@ -47,6 +47,9 @@ class Concatenation(Rope):
 
     def __str__(self):
         return self.left.string + self.right.string
+    
+    def length(self):
+        return self.left.length() + self.right.length()
 
 class Deletion(Rope):
     def __init__(self, rope, start, leng):
@@ -71,4 +74,5 @@ equals(to_rope("ABCDE").substring(1,3).substring(1,1), "C")
 equals(to_rope("ABC").concatenate(to_rope("DE")), "ABCDE")
 equals(to_rope("ABCDE").delete(1, 3), "AE")
 equals(to_rope("ABCDE").substring(1,3).length(), "3")
+# equals(to_rope("ABC").concatenate(to_rope("DE")).length(), "5")
 
