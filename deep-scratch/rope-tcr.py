@@ -16,9 +16,6 @@ def to_rope(string):
     return String(string)
 
 class Rope:
-    def substring(self, start, length):
-        return Substring(self, start, length)
-
     def delete(self, start, length):
         return Deletion(self, start, length)
     
@@ -35,8 +32,6 @@ class Rope:
     
     def __getitem__(self, slice):
         return Substring(self, slice.start, slice.stop - slice.start)
-        # return self.substring(slice.start, slice.stop - slice.start)
-
 class String(Rope):
     def __init__(self, string):
         self.string = string
