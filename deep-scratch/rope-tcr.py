@@ -27,7 +27,7 @@ class Rope:
     def insert(self, rope, start):
         left = self.substring(0, start) # AB
         right = self.substring(start, len(self) - start)
-        return left.concatenate(rope).concatenate(right)
+        return left + rope + right
     
     def __len__(self):
         raise Exception("should have been overriden")
