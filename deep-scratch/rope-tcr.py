@@ -63,7 +63,8 @@ class Substring(Rope):
     def __len__(self):
         return self.leng
 
-
+    def __get_single_item__(self, index):
+        return self.string[index]
 class Concatenation(Rope):
     def __init__(self, left, right): # left: rope
         self.left = left
@@ -110,3 +111,4 @@ equals(to_rope("ABE").insert(to_rope("CD"), 2), "ABCDE")
 equals(to_rope("ABCDE")[3], "D")
 equals((to_rope("ABC") + to_rope("DE"))[3], "D")
 equals((to_rope("ABC") + to_rope("DE"))[2], "C")
+# equals(to_rope("ABCDE")[0:4][3], "C")
