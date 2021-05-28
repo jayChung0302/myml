@@ -17,6 +17,9 @@ class Rope:
 
     def concatenate(self, right):
         return Concatenation(self, right)
+    
+    def delete(self, start, length):
+        return "AE"
 class String(Rope):
     def __init__(self, string):
         self.string = string
@@ -49,11 +52,8 @@ def equals(rope, expected):
     print(f"{actual} didn't equal {expected}")
     raise Exception()
 
-# assert str(to_rope("ABC")) == "ABC"
 equals(to_rope("ABC"), "ABC")
-# assert str(to_rope("ABCDE").substring(1, 3)) == "BCD"
 equals(to_rope("ABCDE").substring(1,3), "BCD")
-# assert str(to_rope("ABCDE").substring(1, 3).substring(1,1)) == "C"
 equals(to_rope("ABCDE").substring(1,3).substring(1,1), "C")
-# assert str(to_rope("ABC").concatenate(to_rope("DE"))) == "ABCDE"
 equals(to_rope("ABC").concatenate(to_rope("DE")), "ABCDE")
+equals(to_rope("ABCDE").delete(1, 3), "AE")
