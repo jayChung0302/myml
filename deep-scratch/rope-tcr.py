@@ -31,6 +31,9 @@ class Rope:
     
     def length(self):
         raise Exception("should have been overriden")
+    
+    def __len__(self):
+        raise Exception("should have been overriden")
 
 class String(Rope):
     def __init__(self, string):
@@ -40,6 +43,9 @@ class String(Rope):
         return self.string
     
     def length(self):
+        return len(self.string)
+    
+    def __len__(self):
         return len(self.string)
         
 class Substring(Rope):
@@ -53,6 +59,10 @@ class Substring(Rope):
     
     def length(self):
         return self.leng
+    
+    def __len__(self):
+        return self.leng
+
 
 class Concatenation(Rope):
     def __init__(self, left, right): # left: rope
@@ -63,6 +73,9 @@ class Concatenation(Rope):
         return str(self.left) + str(self.right)
     
     def length(self):
+        return self.left.length() + self.right.length()
+
+    def __len__(self):
         return self.left.length() + self.right.length()
 
 class Deletion(Rope):
@@ -87,6 +100,6 @@ equals(to_rope("ABCDE").substring(1,3), "BCD")
 equals(to_rope("ABCDE").substring(1,3).substring(1,1), "C")
 equals(to_rope("ABC").concatenate(to_rope("DE")), "ABCDE")
 equals(to_rope("ABCDE").delete(1, 3), "AE")
-equals(to_rope("ABCDE").substring(1,3).length(), "3")
-equals(to_rope("ABC").concatenate(to_rope("DE")).length(), "5")
+equals(len(to_rope("ABCDE").substring(1,3)), "3")
+equals(len(to_rope("ABC").concatenate(to_rope("DE"))), "5")
 equals(to_rope("ABE").insert(to_rope("CD"), 2), "ABCDE")
