@@ -54,7 +54,7 @@ class Concatenation(Rope):
         self.right = right
 
     def __str__(self):
-        return self.left.string + self.right.string
+        return str(self.left) + str(self.right)
     
     def length(self):
         return self.left.length() + self.right.length()
@@ -83,4 +83,4 @@ equals(to_rope("ABC").concatenate(to_rope("DE")), "ABCDE")
 equals(to_rope("ABCDE").delete(1, 3), "AE")
 equals(to_rope("ABCDE").substring(1,3).length(), "3")
 equals(to_rope("ABC").concatenate(to_rope("DE")).length(), "5")
-# equals(to_rope("ABE").insert(to_rope("CD"), 2), "ABCDE")
+equals(to_rope("ABE").insert(to_rope("CD"), 2), "ABCDE")
