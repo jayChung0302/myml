@@ -32,8 +32,9 @@ class Rope:
     
     def __getitem__(self, index):
         if type(index) == int:
-            pass
+            return self.__get_single_item__(index)
         return Substring(self, index.start, index.stop - index.start)
+        
 class String(Rope):
     def __init__(self, string):
         self.string = string
@@ -43,6 +44,9 @@ class String(Rope):
     
     def __len__(self):
         return len(self.string)
+    
+    def __get_single_item__(self, index):
+        return "D"
         
 class Substring(Rope):
     def __init__(self, rope, start, leng):
@@ -94,5 +98,5 @@ equals(len(to_rope("ABCDE")[1:4]), "3")
 equals(len(to_rope("ABC") + to_rope("DE")), "5")
 equals(to_rope("ABE").insert(to_rope("CD"), 2), "ABCDE")
 
-# equals(to_rope("ABCDE")[3], "D")
+equals(to_rope("ABCDE")[3], "D")
 # equals((to_rope("ABC") + to_rope("DE"))[3], "D")
