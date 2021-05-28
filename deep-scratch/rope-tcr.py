@@ -2,7 +2,10 @@
 # add very large string, how can you insert single character into the middle of it in constant time?
 
 #TODO
-# insert
+# [] notation
+# len() function
+# + for concatenation
+# insert # done
 # delete # done
 # substring # done
 # concatenation # done
@@ -25,6 +28,9 @@ class Rope:
         left = self.substring(0, start) # AB
         right = self.substring(start, self.length() - start)
         return left.concatenate(rope).concatenate(right)
+    
+    def length(self):
+        raise Exception("should have been overriden")
 
 class String(Rope):
     def __init__(self, string):
