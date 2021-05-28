@@ -18,9 +18,6 @@ class Rope:
     def substring(self, start, length):
         return Substring(self, start, length)
 
-    def concatenate(self, right):
-        return Concatenation(self, right)
-    
     def delete(self, start, length):
         return Deletion(self, start, length)
     
@@ -33,7 +30,8 @@ class Rope:
         raise Exception("should have been overriden")
 
     def __add__(self, addend):
-        return self.concatenate(addend)
+        return Concatenation(self, addend)
+        
 
 class String(Rope):
     def __init__(self, string):
