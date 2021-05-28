@@ -22,7 +22,9 @@ class Rope:
         return Deletion(self, start, length)
     
     def insert(self, rope, start):
-        pass
+        left = self.substring(0, start) # AB
+        right = self.substring(start, self.length() - start)
+        return left.concatenate(rope).concatenate(right)
 
 class String(Rope):
     def __init__(self, string):
