@@ -76,7 +76,7 @@ class Concatenation(Rope):
         return self.left.length() + self.right.length()
 
     def __len__(self):
-        return self.left.length() + self.right.length()
+        return len(self.left) + len(self.right)
 
 class Deletion(Rope):
     def __init__(self, rope, start, leng):
