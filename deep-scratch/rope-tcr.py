@@ -3,7 +3,7 @@
 
 #TODO
 # insert
-# delete
+# delete # done
 # substring # done
 # concatenation # done
 
@@ -38,7 +38,7 @@ class Substring(Rope):
         return str(self.rope)[self.start :  self.start + self.length]
 
 class Concatenation(Rope):
-    def __init__(self, left, right):
+    def __init__(self, left, right): # left: rope
         self.left = left
         self.right = right
 
