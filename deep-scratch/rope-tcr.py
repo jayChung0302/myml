@@ -29,10 +29,10 @@ class String(Rope):
         return self.string
         
 class Substring(Rope):
-    def __init__(self, rope, start, length):
+    def __init__(self, rope, start, leng):
         self.rope = rope
         self.start = start
-        self.length = length
+        self.length = leng
 
     def __str__(self):
         return str(self.rope)[self.start :  self.start + self.length]
@@ -46,10 +46,10 @@ class Concatenation(Rope):
         return self.left.string + self.right.string
 
 class Deletion(Rope):
-    def __init__(self, rope, start, length):
+    def __init__(self, rope, start, leng):
         self.rope = rope
         self.start = start
-        self.length = length
+        self.length = leng
 
     def __str__(self):
         return str(self.rope)[:self.start] + str(self.rope)[self.start + self.length:]
@@ -67,3 +67,5 @@ equals(to_rope("ABCDE").substring(1,3), "BCD")
 equals(to_rope("ABCDE").substring(1,3).substring(1,1), "C")
 equals(to_rope("ABC").concatenate(to_rope("DE")), "ABCDE")
 equals(to_rope("ABCDE").delete(1, 3), "AE")
+# equals(to_rope("ABCDE").substring(1,3).length(), "3")
+
