@@ -53,5 +53,6 @@ def equals(rope, expected):
 equals(to_rope("ABC"), "ABC")
 # assert str(to_rope("ABCDE").substring(1, 3)) == "BCD"
 equals(to_rope("ABCDE").substring(1,3), "BCD")
-assert str(to_rope("ABCDE").substring(1, 3).substring(1,1)) == "C"
+# assert str(to_rope("ABCDE").substring(1, 3).substring(1,1)) == "C"
+equals(to_rope("ABCDE").substring(1,3).substring(1,1), "C")
 assert str(to_rope("ABC").concatenate(to_rope("DE"))) == "ABCDE"
