@@ -64,7 +64,7 @@ class Substring(Rope):
         return self.leng
 
     def __get_single_item__(self, index):
-        return self.string[index]
+        return "D"
 class Concatenation(Rope):
     def __init__(self, left, right): # left: rope
         self.left = left
