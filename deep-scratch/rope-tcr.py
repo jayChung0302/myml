@@ -50,9 +50,9 @@ class Deletion(Rope):
         self.rope = rope
         self.start = start
         self.length = length
-        
+
     def __str__(self):
-        return "AE"
+        return str(self.rope)[:self.start] + str(self.rope)[self.start + self.length:]
 
 # Testing Framework
 def equals(rope, expected):
