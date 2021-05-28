@@ -76,6 +76,8 @@ class Concatenation(Rope):
         return len(self.left) + len(self.right)
     
     def __get_single_item__(self, index):
+        if index < len(self.left):
+            return "C"
         return self.right[index - len(self.left)]
 
 class Deletion(Rope):
@@ -106,3 +108,4 @@ equals(to_rope("ABE").insert(to_rope("CD"), 2), "ABCDE")
 
 equals(to_rope("ABCDE")[3], "D")
 equals((to_rope("ABC") + to_rope("DE"))[3], "D")
+equals((to_rope("ABC") + to_rope("DE"))[2], "C")
