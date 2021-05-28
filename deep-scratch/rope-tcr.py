@@ -55,4 +55,5 @@ equals(to_rope("ABC"), "ABC")
 equals(to_rope("ABCDE").substring(1,3), "BCD")
 # assert str(to_rope("ABCDE").substring(1, 3).substring(1,1)) == "C"
 equals(to_rope("ABCDE").substring(1,3).substring(1,1), "C")
-assert str(to_rope("ABC").concatenate(to_rope("DE"))) == "ABCDE"
+# assert str(to_rope("ABC").concatenate(to_rope("DE"))) == "ABCDE"
+equals(to_rope("ABC").concatenate(to_rope("DE")), "ABCDE")
