@@ -76,7 +76,7 @@ class Concatenation(Rope):
         return len(self.left) + len(self.right)
     
     def __get_single_item__(self, index):
-        return "D"
+        return self.rigt[index - len(self.left)]
 
 class Deletion(Rope):
     def __init__(self, rope, start, leng):
