@@ -3,8 +3,9 @@
 
 #TODO
 # [] notation
-# len() function # done
+# reorder
 # + for concatenation
+# len() function # done
 # insert # done
 # delete # done
 # substring # done
@@ -31,7 +32,9 @@ class Rope:
 
     def __add__(self, addend):
         return Concatenation(self, addend)
-        
+    
+    def __getitem__(self, param):
+        return param
 
 class String(Rope):
     def __init__(self, string):
