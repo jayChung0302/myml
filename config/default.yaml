@@ -2,7 +2,6 @@
 train:
   learning_rate: 0.005
   run_test: True
-
 dataset:
   name: cifar-10
   path: /datasets/cifar-10

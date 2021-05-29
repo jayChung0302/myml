@@ -8,6 +8,11 @@ def as_array(x):
             return np.array(x)
         return x
 
+def as_variable(obj):
+    if isinstance(obj, Variable):
+        return obj
+    return Variable(obj)
+
 class Variable:
     def __init__(self, data, name=None): # name 지정
         if data is not None:
@@ -28,11 +33,17 @@ class Variable:
         p = str(self.data).replace('\n', '\n' + ' ' * 9)
         return 'variable(' + p +')'
     
+    def __add__(self, other):
+        return add(self, other)
+    
+    def __radd__(self, other):
+        return add(self, other)
+
     def __mul__(self, other):
         return mul(self, other)
     
-    def __add__(self, other):
-        return add(self, other)
+    def __rmul__(self, other):
+        return mul(self, other)
 
     def set_creator(self, func):
         self.creator = func
@@ -92,6 +103,8 @@ class Variable:
     @property
     def dtype(self):
         return self.data.dtype
+    
+
             
 class Config:
     # 설정 데이터는 단 한 군데에만 존재하는게 좋음. 따라서 클래스를 인스턴스화 하지 않고 클래스 상태 그대로 이용
@@ -99,6 +112,7 @@ class Config:
 
 class Function:
     def __call__(self, *inputs):
+        inputs = [as_variable(x) for x in inputs] # variable 화
         xs = [x.data for x in inputs]
         ys = self.forward(*xs)
         if not isinstance(ys, tuple):
@@ -173,10 +187,12 @@ class Exp(Function):
         return gx
 
 def add(x0, x1):
+    x1 = as_array(x1)
     f = Add()
     return f(x0, x1)
 
 def mul(x0, x1):
+    x1 = as_array(x1)
     f = Mul()
     return f(x0, x1)
 
@@ -187,3 +203,22 @@ def square(x):
 def exp(x):
     f = Exp()
     return f(x)
+
+# Variable.__add__ = add
+# Variable.__radd__ = add
+# Variable.__mul__ = mul
+# Variable.__rmul__ = mul
+
+if __name__ == '__main__':
+    # step21.py test
+    x = Variable(np.array(2.0))
+    y = x + np.array(3.0)
+    print(y)
+
+    y = x + 3.0
+    print(y)
+
+    x = Variable(np.array(2.0))
+    y = 3.0 * x + 1.0
+    print(y)
+    
