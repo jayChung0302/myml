@@ -33,6 +33,7 @@ class Function:
 
 class Variable:
     def __init__(self, data, name=None): # name 지정
+        __array_priority__ = 200
         if data is not None:
             if not isinstance(data, np.ndarray):
                 raise TypeError(f'{type(data)} type is not available.')
@@ -120,7 +121,7 @@ def add(x0, x1):
     x1 = as_array(x1)
     f = Add()
     return f(x0, x1)
-    
+
 if __name__ == '__main__':
     x = Variable(np.array(2.0))
     y = x + np.array(3.0)

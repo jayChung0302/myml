@@ -14,6 +14,7 @@ def as_variable(obj):
     return Variable(obj)
 
 class Variable:
+    __array_priority__ = 200
     def __init__(self, data, name=None): # name 지정
         if data is not None:
             if not isinstance(data, np.ndarray):
@@ -44,6 +45,24 @@ class Variable:
     
     def __rmul__(self, other):
         return mul(self, other)
+
+    def __neg__(self, other):
+        return neg(self, other)
+    
+    def __sub__(self, other):
+        return sub(self, other)
+        
+    def __rsub__(self, other):
+        return rsub(self, other)
+    
+    def __truediv__(self, other):
+        return div(self, other)
+    
+    def __rtruediv__(self, other):
+        return rdiv(self, other)
+
+    def __pow__(self, other):
+        return pow(self, other)
 
     def set_creator(self, func):
         self.creator = func
@@ -166,6 +185,21 @@ class Mul(Function):
         x0, x1 = self.inputs[0].data, self.inputs[1].data
         return gy * x1, gy * x0
 
+class Neg(Function):
+    def forward(self, x):
+        return -x
+
+    def backward(self, gy):
+        return -gy
+
+class Sub(Function):
+    def forward(self, x0, x1):
+        y = x0 - x1
+        return y
+    
+    def backward(self, gy):
+        return gy, -gy
+
 class Square(Function):
     def forward(self, x):
         y = x ** 2
@@ -186,6 +220,31 @@ class Exp(Function):
         gx = gy * np.exp(x)
         return gx
 
+class Div(Function):
+    def forward(self, x0, x1):
+        y = x0 / x1
+        return y
+    
+    def backward(self, gy):
+        x0, x1 = self.inputs[0].data, self.inputs[1].data
+        gx0 = gy / x1
+        gx1 = gy * (-x0 / x1 ** 2)
+        return gx0, gx1
+
+class Pow(Function):
+    def __init__(self, c):
+        self.c = c
+    
+    def forward(self, x):
+        y = x ** self.c
+        return y
+    
+    def backward(self, gy):
+        x = self.inputs[0].data
+        c = self.c
+        gx = c * x ** (c - 1) * gy
+        return gx
+
 def add(x0, x1):
     x1 = as_array(x1)
     f = Add()
@@ -204,10 +263,40 @@ def exp(x):
     f = Exp()
     return f(x)
 
+def neg(x):
+    f = Neg()
+    return f(x)
+    
+def sub(x0, x1):
+    x1 = as_array(x1)
+    f = Sub()
+    return f(x0, x1)
+
+def rsub(x0, x1):
+    x1 = as_array(x1)
+    f = Sub()
+    return f(x1, x0)
+
+def div(x0, x1):
+    x1 = as_array(x1)
+    f = Div()
+    return f(x0, x1)
+
+def rdiv(x0, x1):
+    x1 = as_array(x1)
+    f = Div()
+    return f(x1, x0)
+
+def pow(x, c):
+    f = Pow(c)
+    return f(x)
+
 # Variable.__add__ = add
 # Variable.__radd__ = add
 # Variable.__mul__ = mul
 # Variable.__rmul__ = mul
+# Variable.__neg__ = neg
+# Variable.__rsub__ = rsub
 
 if __name__ == '__main__':
     # step21.py test
@@ -222,3 +311,15 @@ if __name__ == '__main__':
     y = 3.0 * x + 1.0
     print(y)
     
+    x = Variable(np.array([1.0]))
+    y = np.array([2.0]) + x
+    print(y)
+
+    x = Variable(np.array(2.0))
+    y1 = 1.0 - x
+    y2 = x - 1.0
+    print(y1, y2)
+
+    x = Variable(np.array(2.0))
+    y = x ** 3
+    print(y)
