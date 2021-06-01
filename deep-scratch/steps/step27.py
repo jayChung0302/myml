@@ -40,4 +40,7 @@ if __name__ == '__main__':
     
     x = Variable(np.array(np.pi/4))
     y = mysin(x)
+    y.backward()
     print(y.data)
+    print(x.grad)
+    
