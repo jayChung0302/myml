@@ -3,7 +3,7 @@ if '__file__' in globals():
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import numpy as np
-from dezero.core import Function
+from dezero.core import Function, as_variable
 from dezero import utils
 
 class Sin(Function):
@@ -96,3 +96,33 @@ def reshape_sum_backward(gy, x_shape, axis, keepdims):
 
     gy = gy.reshape(shape)  # reshape
     return gy
+
+class Reshape(Function):
+    def __init__(self, shape):
+        self.shape = shape
+
+    def forward(self, x):
+        self.x_shape = x.shape
+        y = x.reshape(self.shape)
+        return y
+    
+    def backward(self, gy):
+        return reshape(gy, self.x_shape)
+        
+def reshape(x, shape):
+    if x.shape == shape:
+        return as_variable(x)
+    return Reshape(shape)(x)
+
+class Transpose(Function):
+    def forward(self, x):
+        y = np.transpose(x)
+        return y
+
+    def backward(self, gy):
+        gx = transpose(gy)
+        return gx
+    
+def transpose(x):
+    f = Transpose()
+    return f(x)
