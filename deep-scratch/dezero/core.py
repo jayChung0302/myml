@@ -268,6 +268,9 @@ class Pow(Function):
         gx = c * x ** (c - 1) * gy
         return gx
 
+class Parameter(Variable):
+    pass
+
 def add(x0, x1):
     x1 = as_array(x1)
     f = Add()
