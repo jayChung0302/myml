@@ -4,7 +4,7 @@ if '__file__' in globals():
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import numpy as np
-from dezero.core import Function, as_variable
+from dezero.core import Function, as_variable, exp
 from dezero import utils
 
 class Sin(Function):
@@ -217,3 +217,17 @@ class MeanSquaredError(Function):
 def mean_squared_error(x0, x1):
     f = MeanSquaredError()
     return f(x0, x1)
+
+def linear_simple(x, W, b=None):
+    t = matmul(x, W)
+    if b is None:
+        return t
+    
+    y = t + b
+    t.data = None # t 의 데이터 삭제
+    return y
+
+def sigmoid_simple(x):
+    x = as_variable(x)
+    y = 1 / (1 + exp(-x))
+    return y

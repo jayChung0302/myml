@@ -229,7 +229,7 @@ class Square(Function):
         return y
     
     def backward(self, gy):
-        x = self.inputs
+        x = self.inputs[0]
         gx = 2 * x * gy
         return gx
 
@@ -239,8 +239,8 @@ class Exp(Function):
         return y
     
     def backward(self, gy):
-        x = self.inputs
-        gx = gy * np.exp(x)
+        y = self.inputs[0]
+        gx = gy * y
         return gx
 
 class Div(Function):
