@@ -1,6 +1,6 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 import dezero
-# -*- coding: utf-8 -*-
 import numpy as np
 from typing import ClassVar
 import weakref
@@ -18,7 +18,7 @@ def as_variable(obj):
     
 class Variable:
     __array_priority__ = 200
-    def __init__(self, data, name=None): # name 지정
+    def __init__(self, data, name=None):
         if data is not None:
             if not isinstance(data, np.ndarray):
                 raise TypeError(f'{type(data)} type is not available.')
@@ -187,11 +187,17 @@ def no_grad():
 
 class Add(Function): # Function 에서 unpack 및 tuple 아닐 경우 튜플화로 구현했기 때문에
     def forward(self, x0, x1): # 이렇게 간결히 짤 수 있음.
+        self.x0_shape, self.x1_shape = x0.shape, x1.shape
         y = x0 + x1
         return y
     
     def backward(self, gy):
-        return gy, gy # 덧셈의 미분값은 1이므로 상위 노드에서의 gradient 가 그대로 전달된다.
+        gx0, gx1 = gy, gy
+        # forward 에서 broadcast 일어났다면 shape 이 다를테니 backward 시 조건 걸어 broadcast 용 역전파 계산
+        if self.x0_shape != self.x1_shape:
+            gx0 = dezero.functions.sum_to(gx0, self.x0_shape)
+            gx1 = dezero.functions.sum_to(gx1, self.x1_shape)
+        return gx0, gx1 # 덧셈의 미분값은 1이므로 상위 노드에서의 gradient 가 그대로 전달된다.
 
 class Mul(Function):
     def forward(self, x0, x1):
