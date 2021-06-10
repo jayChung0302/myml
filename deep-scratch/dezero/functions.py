@@ -1,18 +1,14 @@
 # -*- coding: utf-8 -*-
-if '__file__' in globals():
-    import os, sys
-    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-
 import numpy as np
-import dezero
 from dezero.core import Function, as_variable, exp, log
-from dezero import utils
+from dezero import utils, cuda
+import dezero
 
 class Sin(Function):
     def forward(self, x):
         y = np.sin(x)
         return y
-    
+        
     def backward(self, gy):
         x, = self.inputs
         gx = gy * cos(x)
@@ -309,6 +305,57 @@ def softmax_simple(x, axis=1):
     y = exp(x)
     sum_y = sum(y, axis=axis, keepdims=True)
     return y / sum_y
+
+class SoftmaxCrossEntropy(Function):
+    def forward(self, x, t):
+        N = x.shape[0]
+        log_z = utils.logsumexp(x, axis=1)
+        log_p = x - log_z
+        log_p = log_p[np.arange(N), t.ravel()]
+        y = -log_p.sum() / np.float32(N)
+        return y
+
+    def backward(self, gy):
+        x, t = self.inputs
+        N, CLS_NUM = x.shape
+
+        gy *= 1/N
+        y = softmax(x)
+        # convert to one-hot
+        xp = cuda.get_array_module(t.data)
+        t_onehot = xp.eye(CLS_NUM, dtype=t.dtype)[t.data]
+        y = (y - t_onehot) * gy
+        return y
+
+
+def softmax_cross_entropy(x, t):
+    return SoftmaxCrossEntropy()(x, t)
+    
+class Softmax(Function):
+    def __init__(self, axis=1):
+        self.axis = axis
+
+    def forward(self, x):
+        # xp = cuda.get_array_module(x)
+        print(x.shape)
+        print(x)
+        print(self.axis)
+        print(x.max(axis=self.axis))
+        y = x - x.max(axis=self.axis, keepdims=True)
+        y = exp(y)
+        y /= y.sum(axis=self.axis, keepdims=True)
+        return y
+
+    def backward(self, gy):
+        y = self.outputs[0]()
+        gx = y * gy
+        sumdx = gx.sum(axis=self.axis, keepdims=True)
+        gx -= y * sumdx
+        return gx
+
+
+def softmax(x, axis=1):
+    return Softmax(axis)(x)
 
 def get_item(x, slices):
     f = GetItem(slices)
