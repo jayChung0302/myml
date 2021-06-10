@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import numpy as np
+from numpy.core.fromnumeric import var
 from dezero.core import Function, as_variable, exp, log
-from dezero import utils, cuda
+from dezero import utils, cuda, Variable, as_array
 import dezero
 
 class Sin(Function):
@@ -330,19 +331,15 @@ class SoftmaxCrossEntropy(Function):
 
 def softmax_cross_entropy(x, t):
     return SoftmaxCrossEntropy()(x, t)
-    
+
 class Softmax(Function):
     def __init__(self, axis=1):
         self.axis = axis
 
     def forward(self, x):
-        # xp = cuda.get_array_module(x)
-        print(x.shape)
-        print(x)
-        print(self.axis)
-        print(x.max(axis=self.axis))
+        xp = cuda.get_array_module(x)
         y = x - x.max(axis=self.axis, keepdims=True)
-        y = exp(y)
+        y = xp.exp(y)
         y /= y.sum(axis=self.axis, keepdims=True)
         return y
 
@@ -361,19 +358,40 @@ def get_item(x, slices):
     f = GetItem(slices)
     return f(x)
 
+class Clip(Function):
+    def __init__(self, x_min, x_max):
+        self.x_min = x_min
+        self.x_max = x_max
+
+    def forward(self, x):
+        xp = cuda.get_array_module(x)
+        y = xp.clip(x, self.x_min, self.x_max)
+        return y
+
+    def backward(self, gy):
+        x, = self.inputs
+        mask = (x.data >= self.x_min) * (x.data <= self.x_max)
+        gx = gy * mask
+        return gx
+
 def clip(x, x_min, x_max):
-    x = as_variable(x)
-    x.data = np.clip(x.data, x_min, x_max)
-    return x
+    return Clip(x_min, x_max)(x)
 
 def softmax_cross_entropy_simple(x, t):
     x, t = as_variable(x), as_variable(t)
     N = x.shape[0]
 
-    p = softmax_simple(x)
+    p = softmax(x)
     p = clip(p, 1e-15, 1.0)
     log_p = log(p)
     tlog_p = log_p[np.arange(N), t.data]
     y = -1 * sum(tlog_p) / N
     return y
 
+def accuracy(y, t):
+    y, t = as_variable(y), as_variable(t)
+
+    pred = y.data.argmax(axis=1).reshape(t.shape)
+    result = (pred == t.data)
+    acc = result.mean()
+    return Variable(as_array(acc))

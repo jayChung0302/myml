@@ -21,20 +21,21 @@ class Dataset:
         self.data = None
         self.label = None
         self.prepare()
-
-    def __getitem__(self, index):
-        assert np.isscalar(index)
+    
+    def __getitem__(self, idx):
+        assert np.isscalar(idx) # support only int type
         if self.label is None:
-            return self.transform(self.data[index]), None
+            return self.transform(self.data[idx]), None
         else:
-            return self.transform(self.data[index]),\
-                   self.target_transform(self.label[index])
-
+            return self.transform(self.data[idx]), \
+                self.target_transform(self.label[idx])
+    
     def __len__(self):
         return len(self.data)
-
+    
     def prepare(self):
         pass
+
 
 
 # =============================================================================
@@ -231,7 +232,7 @@ class CIFAR100(CIFAR10):
     def labels(label_type='fine'):
         coarse_labels = dict(enumerate(['aquatic mammals','fish','flowers','food containers','fruit and vegetables','household electrical device','household furniture','insects','large carnivores','large man-made outdoor things','large natural outdoor scenes','large omnivores and herbivores','medium-sized mammals','non-insect invertebrates','people','reptiles','small mammals','trees','vehicles 1','vehicles 2']))
         fine_labels = []
-        return fine_labels if label_type is 'fine' else coarse_labels
+        return fine_labels if label_type == 'fine' else coarse_labels
 
 
 
