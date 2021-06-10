@@ -243,6 +243,15 @@ class Exp(Function):
         gx = gy * y
         return gx
 
+class Log(Function):
+    def forward(self, x):
+        y = np.log(x)
+        return y
+    
+    def backward(self, gy):
+        gx = gy * (1 / self.inputs[0])
+        return gx
+
 class Div(Function):
     def forward(self, x0, x1):
         y = x0 / x1
@@ -289,6 +298,10 @@ def exp(x):
     f = Exp()
     return f(x)
 
+def log(x):
+    f = Log()
+    return f(x)
+
 def neg(x):
     f = Neg()
     return f(x)
@@ -328,3 +341,4 @@ def setup_variable():
     Variable.__truediv__ = div
     Variable.__rtruediv__ = rdiv
     Variable.__pow__ = pow
+    Variable.__getitem__ = dezero.functions.get_item
