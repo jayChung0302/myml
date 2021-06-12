@@ -52,6 +52,17 @@ def sum_to(x, shape):
         y = y.squeeze(lead_axis)
     return y
 
+def show_progress(block_num, block_size, total_size):
+    bar_template = "\r[{}] {:.2f}%"
+
+    downloaded = block_num * block_size
+    p = downloaded / total_size * 100
+    i = int(downloaded / total_size * 30)
+    if p >= 100.0: p = 100.0
+    if i >= 30: i = 30
+    bar = "#" * i + "." * (30 - i)
+    print(bar_template.format(bar, p), end='')
+    
 cache_dir = os.path.join(os.path.expanduser('~'), '.dezero')
 
 def get_file(url, file_name=None):
