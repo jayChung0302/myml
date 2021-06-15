@@ -1,5 +1,5 @@
 import numpy as np
-gpu_enable = True
+gpu_enable = False
 try:
     import cupy as cp
     cupy = cp
