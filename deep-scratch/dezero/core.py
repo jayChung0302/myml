@@ -157,6 +157,7 @@ class Variable:
 class Config:
     # 설정 데이터는 단 한 군데에만 존재하는게 좋음. 따라서 클래스를 인스턴스화 하지 않고 클래스 상태 그대로 이용
     enable_backprop = True
+    train = True
 
 class Function:
     def __call__(self, *inputs):
@@ -195,6 +196,9 @@ def using_config(name: str, value: bool):
     finally:
         setattr(Config, name, old_value)
 
+def test_mode():
+    return using_config('train', False)
+    
 def no_grad():
         return using_config('enable_backprop', False)
 
