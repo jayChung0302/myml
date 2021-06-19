@@ -1,9 +1,23 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from numpy.core.fromnumeric import var
-from dezero.core import Function, as_variable, exp, log
-from dezero import utils, cuda, Variable, as_array
 import dezero
+from dezero import cuda, utils
+from dezero.core import Function, Variable, as_variable, as_array
+from dezero.functions_conv import conv2d
+from dezero.functions_conv import deconv2d
+from dezero.functions_conv import conv2d_simple
+from dezero.functions_conv import im2col
+from dezero.functions_conv import col2im
+from dezero.functions_conv import pooling_simple
+from dezero.functions_conv import pooling
+from dezero.functions_conv import average_pooling
+from dezero.core import add
+from dezero.core import sub
+from dezero.core import rsub
+from dezero.core import mul
+from dezero.core import div
+from dezero.core import neg
+from dezero.core import pow
 
 class Sin(Function):
     def forward(self, x):
