@@ -20,7 +20,7 @@ class Script:
 class Memo:
     def __init__(self, memo_dir=None):
         self.memo = {}
-        self.datelist = []
+        self.datelist = {}
         self.hashlist = {}
         self.name = "./auto_saved_memo"
         # self.last_name = ""
@@ -39,7 +39,7 @@ class Memo:
                 self.hashlist = pickle.load(file)
 
         except:
-            raise FileNotFoundError(f'file doesn\'t exist in {self.memo_dir}')
+            raise FileNotFoundError(f'File doesn\'t exist in {self.memo_dir}')
 
     def set_today(self):
         today = str(datetime.today()).split()[0]
@@ -48,21 +48,50 @@ class Memo:
         
         return today
     
-
     def total_save(self, save_dir="./"):
         with open(save_dir + self.name + '.pkl', 'wb') as file:
             pickle.dump(self.memo, file)
             pickle.dump(self.datelist, file)
             pickle.dump(self.hashlist, file)
 
+    def put_script(self, script: Script):
+        if script.name in self.memo.keys():
+            print('Same script file name already exist.')
+            self.memo[script.name] = self.memo[script.name] + \
+                'Auto saved in {script.date}, {script.time}\n' + script.content
+            print('Auto saved')
+        else:
+            self.memo[script.name] = script.content
+
+        for hashname in script.hashtag:
+            if hashname in self.hashlist.keys():
+                self.hashlist[hashname].append(script.name)
+            else:
+                self.hashlist[hashname] = [script.name]
+
+        if script.date not in self.datelist.keys():
+            self.datelist[script.date] = [script.name]
+        else:
+            self.datelist[script.date].append(script.name)
+
+    def show_memo(self):
+        print(self.memo.keys())
 
     def load_script(self, load_dir="./"):
         pass
 
-    def see(self, ):
-        pass
+    def see(self, script_name):
+        print(self.memo[script_name])
 
 if __name__ == '__main__':
-    memo = Memo()
-    memo.total_save()
-    print()
+    try:
+        memo = Memo()
+        script = Script('0714_example')
+        script.content = '메모장을 만들어 봅시다 헤헤'
+        script.hashtag = ['ss', 'ww']
+        memo.put_script(script)
+        memo.total_save()
+        memo.show_memo()
+        memo.see('0714_example')
+    except:
+        raise KeyError
