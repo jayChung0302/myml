@@ -6,12 +6,11 @@ import pickle
 
 class Script:
     def __init__(self, name:str):
-        self.content = ""
-        self.hashtag = []
+        self.hashtag:List = []
         self.name = name
         self.date = str(datetime.today()).split()[0]
         self.time = str(datetime.today()).split()[1].split('.')[0]
-        self.content = self.content + ", " + self.date
+        self.content = f'{self.date}, {self.time}\n'
 
     def add_hashtag(self, name:Any):
         if isinstance(name, str):
@@ -19,6 +18,9 @@ class Script:
         elif isinstance(name, List):
             self.hashtag += name
     
+    def add_content(self, content:str):
+        self.content += (content + '\n')
+
     def del_hashtag(self, name):
         pass
 
@@ -35,7 +37,7 @@ class Memo:
             self.load_memo(memo_dir)
         
     
-    def load_memo(self, memo_dir):
+    def load_memo(self, memo_dir:str):
         try:
             with open(memo_dir, 'rb') as file:
                 self.memo = pickle.load(file)
@@ -52,8 +54,13 @@ class Memo:
         
         return today
     
-    def total_save(self, save_dir="./"):
-        with open(save_dir + self.name + '.pkl', 'wb') as file:
+    def total_save(self, save_dir=None):
+        if save_dir is not None:
+            filename = save_dir + '/' + self.name + '.pkl'
+        else:
+            filename = './' + self.name + '.pkl'
+            
+        with open(filename, 'wb') as file:
             pickle.dump(self.memo, file)
             pickle.dump(self.datelist, file)
             pickle.dump(self.hashlist, file)
@@ -70,19 +77,22 @@ class Memo:
 
             for hashname in script.hashtag:
                 if hashname in self.hashlist.keys():
-                    self.hashlist[hashname].append(script.name)
+                    if script.name not in self.hashlist[hashname]:
+                        self.hashlist[hashname].append(script.name)
                 else:
                     self.hashlist[hashname] = [script.name]
 
             if script.date not in self.datelist.keys():
                 self.datelist[script.date] = [script.name]
             else:
-                self.datelist[script.date].append(script.name)
+                if script.name not in self.datelist[script.date]:
+                    self.datelist[script.date].append(script.name)
+                
         else:
             raise ValueError(f'{script} is not a Script instance')
 
     def show_memo(self):
-        print(self.memo.keys())
+        print(list(self.memo.keys()))
 
     def load_script(self, load_dir="./"):
         pass
@@ -104,7 +114,7 @@ if __name__ == '__main__':
     #     print(memo.hashlist)
     try:
         script = Script('0714_hi')
-        script.content = 'hello world..!'
+        script.content = 'success.!'
         script.hashtag = ['ss', 'kk']
         memo = Memo()
         memo.load_memo('./auto_saved_memo.pkl')
@@ -112,11 +122,13 @@ if __name__ == '__main__':
         memo.put_script(script)
         memo.total_save()
         memo.show_memo()
-        print(memo.datelist)
-        print(memo.hashlist)
-        memo.read_script('0714_example')
+
+        print('datelist:', memo.datelist)
+        print('hashlist:', memo.hashlist)
         print(memo.memo)
-        print(memo.read_script('0714_hi'))
-        
+        memo.read_script('0714_hi')
+        memo.read_script('0714_example')
+
+
     except:
         raise KeyError
