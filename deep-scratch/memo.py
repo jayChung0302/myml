@@ -24,4 +24,5 @@ class Memo:
         pass
 
 if __name__ == '__main__':
-    pass
+    memo = Memo()
+    memo.save()
