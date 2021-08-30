@@ -1,5 +1,6 @@
 from filter_pruner import Pruner
 import torch.nn as nn
+from torchvision.models.resnet import Bottleneck
 
 def is_leaf_module(module):
     return len(module.children()) == 0
@@ -33,16 +34,44 @@ class pruner_resnet(Pruner):
         # retrieve next immediate bn layer using activation index of conv
         self.bn_for_conv = {}
         self.cur_flops = 0
-        
+
         def modify_forward(net):
-            pass
-        
+            for module in net.children():
+                if is_leaf_module(module):
+                    def new_forward(module):
+                        def lambda_forward(x):
+                            return self.trace_layer(module, x)
+                        return lambda_forward
+                    module.old_forward = module.forward
+                    module.forward = new_forward(module)
+                else:
+                    modify_forward(module)
+
         def restore_forward(net):
-            pass
+            for module in net.children():
+                if is_leaf_module(module) and hasattr(module, 'old_forward'):
+                    module.forward = module.old_forward
+                    module.old_forward = None
+                else:
+                    restore_forward(module)
 
         modify_forward(self.net)
         y = self.net(x)
         restore_forward(self.net)
+
+        self.btnk = False
+        for module in self.net.modules():
+            if isinstance(module, nn.Linear):
+                self.linear = module
+            if isinstance(module, Bottleneck):
+                self.btnk = True
+            pass
+        if self.btnk:
+            self.parse_dependency_btnk()
+        else:
+            self.parse_dependency()
+        self.resoure_usage = self.cur_flops
+
         return y
 
     def get_valid_filters(self):
