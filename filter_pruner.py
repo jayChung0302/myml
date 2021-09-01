@@ -6,11 +6,10 @@ import numpy as np
 __all__ = ['Pruner']
 
 class Pruner:
-    def __init__(self, net, rank_type, num_class=1000, \
+    def __init__(self, net, rank_type='l2_weight', num_class=1000, \
         safeguard=0, random=False, device='cuda', resource='FLOPs'):
         self.net = net
         self.rank_type = rank_type
-        self.num_class = num_class
         self.chains = {} # chainning conv (use activation index 2 present a conv)
         self.y = None
         self.safeguard = safeguard
@@ -30,14 +29,23 @@ class Pruner:
 
     def count_params(self):
         '''Count a number of network's trainable parameters'''
-        total_trainable_params = 0
-        for param in self.net.parameters():
-            if param.requires_grad:
-                total_trainable_params += np.prod(param.shape)
+        params_conv, params_all = 0, 0
 
-        return total_trainable_params
+        for module in self.net.modules():
+            if isinstance(module, nn.Conv2d):
+                params_all += np.prod(module.weight.size())
+                params_conv += np.prod(module.weight.size())
+            if isinstance(module, nn.Linear):
+                params_all += np.prod(module.weight.size())
+                
+
+        return params_all, params_conv
 
     def reset(self):
+        self.cur_flops = 0
+        self.base_flops = 0
+        self.cur_size, conv_size = self.count_params()
+        self.base_size = self.cur_size - conv_size
         self.quota = None
         self.filter_ranks = {}
         self.rates = {}
@@ -72,8 +80,7 @@ class Pruner:
             
             self.filter_ranks[activation_idx] += values
         
-        self.grad_idx += 1
-
+        self.grad_idx += 1        
 
     def calculate_cost(self, encoding):
         pass

@@ -5,7 +5,7 @@ from model.resnet_cifar10 import BasicBlock, DownsampleA
 import numpy as np
 
 def is_leaf_module(module):
-    return len(module.children()) == 0
+    return len(list(module.children())) == 0
 
 class pruner_resnet(Pruner):
     def forward(self, x):
@@ -82,7 +82,7 @@ class pruner_resnet(Pruner):
             self.rates[self.activation_idx] = self.conv_in_channels[self.activation_idx] * \
                 self.cost_map[self.activation_idx]
             self.activation_to_conv[self.activation_idx] = layer
-            self.conv_to_idx[layer] = self.activation_index
+            self.conv_to_idx[layer] = self.activation_idx
             self.activation_idx += 1
         elif isinstance(layer, nn.BatchNorm2d):
             self.bn_for_conv[self.activation_idx-1] = layer
@@ -133,7 +133,6 @@ class pruner_resnet(Pruner):
         self.pre_padding = {}
         self.next_conv = {}
         prev_conv_idx = 0
-        prev_res = -1
         for module in self.net.modules():
             if isinstance(module, BasicBlock):
                 cur_conv_idx = self.conv_to_idx[module.conv[3]]
@@ -141,10 +140,11 @@ class pruner_resnet(Pruner):
                     self.pre_padding[cur_conv_idx] = module.shortcut
                 self.chains[prev_conv_idx] = cur_conv_idx
                 prev_conv_idx = cur_conv_idx
+
         last_idx = -1
         for module in self.net.modules():
             if isinstance(module, nn.Conv2d) and module.weight.size(2) == 3:
-                idx = self.conv_to_idx(module)
+                idx = self.conv_to_idx[module]
                 if (last_idx > -1) and (not last_idx in self.next_conv):
                     self.next_conv[last_idx] = [idx]
                 elif (last_idx > -1):
