@@ -113,13 +113,16 @@ def sample(x=""):
     return x
 
 
-def pkl_dump(obj, save_path='./saved_data.pkl', verbose=True):
+def pkl_dump(obj, save_path='./', name=None, verbose=True):
     import pickle
+    if name:
+        save_path = save_path + name + '.pkl'
+    else:
+        save_path = save_path + 'saved_data.pkl'
     with open(save_path, 'wb') as f:
         pickle.dump(obj, f)
     if verbose:
-        var_str = var2str(obj)
-        print(f'{var_str} - save complete!')
+        print('save complete!')
 
 
 def pkl_load(load_path='./saved_data.pkl', verbose=True):
@@ -127,21 +130,17 @@ def pkl_load(load_path='./saved_data.pkl', verbose=True):
         data = pickle.load(f)
     if verbose:
         name = load_path.split('/')[-1]
+
         print(f'{name} - load complete!')
     return data
 
 
-def var2str(var_name):
-    '''transform var_name to string'''
-    return f'{var_name=}'.split('=')[0]
-
-
 if __name__ == '__main__':
-    # send_gmail(message='아하하 후하하하하하핳', subject="테스트메일임")
     import pickle
     x = {}
     x['mail'] = 'nate@gmail.com'
     x['name'] = 'nate'
     x['age'] = 29
+    print(f'{x=}'.split('=')[0])
+    print(f'{x=}')
     pkl_dump(x)
-    print()
