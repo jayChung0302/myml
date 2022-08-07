@@ -9,10 +9,18 @@ from select import kevent
 import smtplib
 from email.mime.text import MIMEText
 import os
+from glob import glob
 import torch
 import cv2
 import tqdm
 # from google.colab import files # 설치안됨(m1?)
+
+
+def get_data_dir(path_dir='./', exts=['*.jpg', '*.png']):
+    data_dirs = []
+    for ext in exts:
+        data_dirs += glob(os.path.join(path_dir, ext))
+    return data_dirs
 
 
 def calculate_mean_var(dataloader):
@@ -34,9 +42,9 @@ def colab_file_upload():
     uploaded = files.upload()
 
 
-def colab_file_upload_drive():
+def colab_file_upload_drive(mount_dir="/content/gdrive"):
     from google.colab import drive
-    drive.mount("/content/gdrive")
+    drive.mount(mount_dir)
 
 
 def make_beep_sound_intel_mac(phrase: str):
