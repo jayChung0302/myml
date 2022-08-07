@@ -5,10 +5,12 @@ code & scrap ML-related functions or objects
 
 from distutils.log import info
 from re import sub
+from select import kevent
 import smtplib
 from email.mime.text import MIMEText
 import os
 import torch
+import cv2
 import tqdm
 # from google.colab import files # 설치안됨(m1?)
 
@@ -80,7 +82,7 @@ def repeat(message: str, times: int = 2) -> list:
     return [message] * times
 
 
-def send_gmail(message: str = "default", subject: str = "default",
+def send_gmail(subject: str = "default", message: str = "default",
                from_gmail: str = "default",
                to_gmail: str = "default", login_gmail: str = "default",
                    app_password="default") -> None:
@@ -88,16 +90,30 @@ def send_gmail(message: str = "default", subject: str = "default",
     info["message"] = "내용 : 본문내용 테스트입니다."
     info["from_gmail"] = "kanari2214@gmail.com"
     info["to_gmail"] = "whtnek@gmail.com"
-    info["login_gmail"] = "kanari2214@gmail.com"
     info["subject"] = "제목 : 메일 보내기 테스트입니다."
+    info["app_password"] = ""
+    info["login_gmail"] = ""
 
     for i in info.keys():
         if locals()[i] != "default":
             info[i] = locals()[i]
+        else:
+            try:
+                if (i == "app_password") or (i == "login_gmail"):
+                    with open('./keys_hash/kanari.txt') as f:
+                        x = f.readlines()
+                        id = x[0].split('\n')[0]
+                        pwd = x[-1].split('\n')[0]
+                        info["login_gmail"] = id
+                        info["app_password"] = pwd
+            except:
+                print('You have to specify app password.')
+    print(info.keys())
     ######
     session = smtplib.SMTP('smtp.gmail.com', 587)
     session.starttls()
-    session.login('kanari2214@gmail.com', 'ckghunxkdnkujfdi')
+
+    session.login(info["login_gmail"], info["app_password"])
     # message 설정
     msg = MIMEText(info["message"])
     msg['Subject'] = info["subject"]
@@ -114,6 +130,7 @@ def sample(x=""):
 
 
 def pkl_dump(obj, save_path='./', name=None, verbose=True):
+    '''pkl_dump(var_name, name=f'{var_name=}'.split('=')[0])'''
     import pickle
     if name:
         save_path = save_path + name + '.pkl'
@@ -122,7 +139,7 @@ def pkl_dump(obj, save_path='./', name=None, verbose=True):
     with open(save_path, 'wb') as f:
         pickle.dump(obj, f)
     if verbose:
-        print('save complete!')
+        print(f'save complete {save_path}!')
 
 
 def pkl_load(load_path='./saved_data.pkl', verbose=True):
@@ -143,4 +160,8 @@ if __name__ == '__main__':
     x['age'] = 29
     print(f'{x=}'.split('=')[0])
     print(f'{x=}')
-    pkl_dump(x)
+    pkl_dump(x, name=f'{x=}'.split('=')[0])
+    # with open('./keys_hash/kanari.txt') as f:
+    #     a = f.readlines()
+    #     print(a[-1].split('\n')[0])
+    send_gmail('ex_subtitle.', 'ex_content')
