@@ -12,9 +12,22 @@ import os
 from glob import glob
 import torch
 import cv2
+import numpy as np
+from omegaconf import OmegaConf
+import yaml
+from PIL import Image
 import tqdm
 # from google.colab import files # 설치안됨(m1?)
 
+def load_np_img(fname, mode='RGB', return_orig=False):
+    img = np.array(Image.open(fname).convert(mode))
+    if img.ndim == 3:
+        img = np.transpose(img, (2, 0, 1))
+    out_img = img.astype('float32') / 255
+    if return_orig:
+        return out_img, img
+    else:
+        return out_img
 
 def get_data_dir(path_dir='./', exts=['*.jpg', '*.png']):
     data_dirs = []
@@ -61,6 +74,9 @@ def calculate_kl_loss(y_true, y_pred):
     loss = y_true * torch.log(y_true / y_pred)
     return loss
 
+
+def mkdir(dir_path, exist_ok=False):
+    os.makedirs(dir_path, exist_ok=exist_ok)
 
 def ransac():
     pass
@@ -131,12 +147,6 @@ def send_gmail(subject: str = "default", message: str = "default",
     session.quit()
 
 
-def sample(x=""):
-    if x is None:
-        x = 'msg'
-    return x
-
-
 def pkl_dump(obj, save_path='./', name=None, verbose=True):
     '''pkl_dump(var_name, name=f'{var_name=}'.split('=')[0])'''
     import pickle
@@ -172,4 +182,6 @@ if __name__ == '__main__':
     # with open('./keys_hash/kanari.txt') as f:
     #     a = f.readlines()
     #     print(a[-1].split('\n')[0])
-    send_gmail('ex_subtitle.', 'ex_content')
+    mkdir('./ex_folder')
+    # send_gmail('ex_subtitle.', 'ex_content')
+    
