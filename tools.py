@@ -29,6 +29,24 @@ def load_np_img(fname, mode='RGB', return_orig=False):
     else:
         return out_img
 
+def pad_np_img_to_modulo(img, mod):
+    '''(np)C x H x W image padding'''
+    channels, height, width = img.shape
+    out_height = ceil_to_modulo(height, mod)
+    out_width = ceil_to_modulo(width, mod)
+    return np.pad(img, ((0, 0), (0, out_height - height), (0, out_width - width)), mode='symmetric')
+    
+def ceil_to_modulo(x, mod):
+    if x % mod == 0:
+        return x
+        # 6, 4 -> 1+1 = 2*4 = 8
+    return (x // mod + 1) * mod
+
+def get_config_from_yaml(config_path):
+    with open(config_path, 'r') as f:
+        config = OmegaConf.create(yaml.safe_load(f))
+    return config
+    
 def get_data_dir(path_dir='./', exts=['*.jpg', '*.png']):
     data_dirs = []
     for ext in exts:
