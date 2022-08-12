@@ -131,12 +131,35 @@ def normalize():
     pass
 
 
-def plot_and_saving():
-    pass
+def split_file_name(filename):
+    '''Get splited file name path, name, extension'''
+    if len(filename.split('.')) > 2:
+        path = os.path.dirname(filename)
+        name = os.path.basename(filename)[:-8]
+        extension = os.path.basename(filename)[-7:]
+    else:
+        path = os.path.dirname(filename)
+        name, extension = os.path.basename(filename).split('.')
+    return path, name, extension
 
 
-def glob_png_and_jpg():
-    pass
+def show_path(path=''):
+    ''''''
+    files = glob.glob('{}/*'.format(path))
+
+    files_ = sorted(files)
+
+    for idx, file in enumerate(files_):
+        path, name, ext = split_file_name(file)
+        img = cv2.imread(file, cv2.IMREAD_UNCHANGED)
+        cv2.imshow(name, img)
+        cv2.moveWindow(name, 40, 30)
+        keycode = cv2.waitKey()  # 키보드 입력 반환 값 저장
+
+        if keycode == ord('q'):  # i 또는 I 누르면 영상 반전
+            cv2.destroyAllWindows()
+        else:
+            cv2.destroyAllWindows()
 
 
 def repeat(message: str, times: int = 2) -> list:
@@ -224,19 +247,6 @@ if __name__ == '__main__':
     # send_gmail('ex_subtitle.', 'ex_content')
     print(get_weeknum())
 
-    # %%
-
-    today = datetime.today().strftime("%Y %m %d").split()
-    from IPython import embed
-    embed()
-    date = datetime(*map(int, today))
-    print()
-    # print(get_today())
-
-# %%
-    import torch
     x = torch.randn(32)
     x = torch.clip(x, 0, 1)
     print(x)
-
-# %%
