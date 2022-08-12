@@ -10,14 +10,17 @@ import smtplib
 from email.mime.text import MIMEText
 import os
 from glob import glob
+from typing import List
 import torch
 import cv2
 import numpy as np
 from omegaconf import OmegaConf
 import yaml
+from datetime import datetime
 from PIL import Image
 import tqdm
 # from google.colab import files # 설치안됨(m1?)
+
 
 def load_np_img(fname, mode='RGB', return_orig=False):
     img = np.array(Image.open(fname).convert(mode))
@@ -29,24 +32,39 @@ def load_np_img(fname, mode='RGB', return_orig=False):
     else:
         return out_img
 
+
+def get_today() -> List:
+    '''Get today's year, month, day information list'''
+    return list(map(int, datetime.today().strftime("%Y %m %d").split()))
+
+
+def get_weeknum():
+    '''Get today's # of week'''
+    date = datetime(*get_today())
+    return date.isocalendar()[1]
+
+
 def pad_np_img_to_modulo(img, mod):
     '''(np)C x H x W image padding'''
     channels, height, width = img.shape
     out_height = ceil_to_modulo(height, mod)
     out_width = ceil_to_modulo(width, mod)
     return np.pad(img, ((0, 0), (0, out_height - height), (0, out_width - width)), mode='symmetric')
-    
+
+
 def ceil_to_modulo(x, mod):
     if x % mod == 0:
         return x
         # 6, 4 -> 1+1 = 2*4 = 8
     return (x // mod + 1) * mod
 
+
 def get_config_from_yaml(config_path):
     with open(config_path, 'r') as f:
         config = OmegaConf.create(yaml.safe_load(f))
     return config
-    
+
+
 def get_data_dir(path_dir='./', exts=['*.jpg', '*.png']):
     data_dirs = []
     for ext in exts:
@@ -95,6 +113,7 @@ def calculate_kl_loss(y_true, y_pred):
 
 def mkdir(dir_path, exist_ok=False):
     os.makedirs(dir_path, exist_ok=exist_ok)
+
 
 def ransac():
     pass
@@ -196,10 +215,28 @@ if __name__ == '__main__':
     x['age'] = 29
     print(f'{x=}'.split('=')[0])
     print(f'{x=}')
+
     pkl_dump(x, name=f'{x=}'.split('=')[0])
     # with open('./keys_hash/kanari.txt') as f:
     #     a = f.readlines()
     #     print(a[-1].split('\n')[0])
-    mkdir('./ex_folder')
+    # mkdir('./ex_folder')
     # send_gmail('ex_subtitle.', 'ex_content')
-    
+    print(get_weeknum())
+
+    # %%
+
+    today = datetime.today().strftime("%Y %m %d").split()
+    from IPython import embed
+    embed()
+    date = datetime(*map(int, today))
+    print()
+    # print(get_today())
+
+# %%
+    import torch
+    x = torch.randn(32)
+    x = torch.clip(x, 0, 1)
+    print(x)
+
+# %%
