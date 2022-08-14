@@ -143,6 +143,17 @@ def normalize():
     pass
 
 
+def parse_all_img(query_dir):
+    ''''''
+    img_files = []
+    for (root, directories, files) in os.walk(query_dir):
+        for file in files:
+            if ('jpg' in file) or ('png' in file):
+                file_path = os.path.join(root, file)
+                img_files.append(file_path)
+    return img_files
+
+
 def split_file_name(filename):
     '''Get splited file name path, name, extension'''
     if len(filename.split('.')) > 2:
