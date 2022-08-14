@@ -4,14 +4,16 @@ code & scrap ML-related functions or objects
 
 
 from distutils.log import info
-from re import sub
+from re import S, sub
 from select import kevent
 import smtplib
 from email.mime.text import MIMEText
 import os
 from glob import glob
 from typing import List
+from matplotlib import pyplot as plt
 import torch
+from torchvision import datasets, transforms
 import cv2
 import numpy as np
 from omegaconf import OmegaConf
@@ -20,17 +22,6 @@ from datetime import datetime
 from PIL import Image
 import tqdm
 # from google.colab import files # 설치안됨(m1?)
-
-
-def load_np_img(fname, mode='RGB', return_orig=False):
-    img = np.array(Image.open(fname).convert(mode))
-    if img.ndim == 3:
-        img = np.transpose(img, (2, 0, 1))
-    out_img = img.astype('float32') / 255
-    if return_orig:
-        return out_img, img
-    else:
-        return out_img
 
 
 def get_today() -> List:
@@ -53,19 +44,21 @@ def pad_np_img_to_modulo(img, mod):
 
 
 def ceil_to_modulo(x, mod):
+    '''Return ceiled x to mod-able form with mod param'''
     if x % mod == 0:
         return x
-        # 6, 4 -> 1+1 = 2*4 = 8
     return (x // mod + 1) * mod
 
 
 def get_config_from_yaml(config_path):
+    '''Get config information from yaml'''
     with open(config_path, 'r') as f:
         config = OmegaConf.create(yaml.safe_load(f))
     return config
 
 
-def get_data_dir(path_dir='./', exts=['*.jpg', '*.png']):
+def get_img_dir(path_dir='./', exts=['*.jpg', '*.png']):
+    '''Get image data dir from given path'''
     data_dirs = []
     for ext in exts:
         data_dirs += glob(os.path.join(path_dir, ext))
@@ -73,27 +66,28 @@ def get_data_dir(path_dir='./', exts=['*.jpg', '*.png']):
 
 
 def calculate_mean_var(dataloader):
-    _, _, img_height, img_width = dataloader[0].size()
+    '''Calculate mean and var from dataloader'''
 
     total_sum = torch.zeros(3)
     total_sum_sq = torch.zeros(3)
-    for inputs in tqdm(dataloader):
-        total_sum += inputs.sum(axis=(0, 2, 3))
-        total_sum_sq += (inputs ** 2).sum(axis=(0, 2, 3))
+    idx = 0
+    for inputs, *label in dataloader:
+        if idx == 0:
+            print('the input size is: ', inputs.size())
+            *out, img_height, img_width = inputs.size()
+        if len(out) > 1:
+            total_sum += inputs.sum(axis=(0, 2, 3))
+            total_sum_sq += (inputs ** 2).sum(axis=(0, 2, 3))
+        else:
+            total_sum += inputs.sum(axis=(1, 2))
+            total_sum_sq += (inputs ** 2).sum(axis=(1, 2))
+
+        idx += 1
     total_num = len(dataloader) * img_height * img_width
     total_mean = total_sum / total_num
     total_var = total_sum_sq / total_num - total_mean ** 2
     total_std = torch.sqrt(total_var)
     return total_mean, total_std
-
-
-def colab_file_upload():
-    uploaded = files.upload()
-
-
-def colab_file_upload_drive(mount_dir="/content/gdrive"):
-    from google.colab import drive
-    drive.mount(mount_dir)
 
 
 def make_beep_sound_intel_mac(phrase: str):
@@ -106,25 +100,34 @@ def make_beep_sound_intel_mac(phrase: str):
 
 
 def calculate_kl_loss(y_true, y_pred):
-    # calculate KL-divergence loss
+    '''Calculate KL-divergence loss manually'''
     loss = y_true * torch.log(y_true / y_pred)
     return loss
 
 
 def mkdir(dir_path, exist_ok=False):
+    '''Make dir except for not exist'''
     os.makedirs(dir_path, exist_ok=exist_ok)
 
 
-def ransac():
-    pass
-
-
-def torch_to_image():
+def torch_to_image(inp, title=None):
     pass
 
 
 def numpy_to_image():
     pass
+
+
+def load_np_img(fname: str, mode='RGB', return_orig=False):
+    '''Load image(numpy) from filename(string)'''
+    img = np.array(Image.open(fname).convert(mode))
+    if img.ndim == 3:
+        img = np.transpose(img, (2, 0, 1))
+    out_img = img.astype('float32') / 255
+    if return_orig:
+        return out_img, img
+    else:
+        return out_img
 
 
 def normalize():
@@ -144,8 +147,8 @@ def split_file_name(filename):
 
 
 def show_path(path=''):
-    ''''''
-    files = glob.glob('{}/*'.format(path))
+    '''Show all image in the path'''
+    files = glob.glob(f'{path}/*')
 
     files_ = sorted(files)
 
@@ -170,6 +173,7 @@ def send_gmail(subject: str = "default", message: str = "default",
                from_gmail: str = "default",
                to_gmail: str = "default", login_gmail: str = "default",
                    app_password="default") -> None:
+    """Send gmail with given string"""
     info = {}
     info["message"] = "내용 : 본문내용 테스트입니다."
     info["from_gmail"] = "kanari2214@gmail.com"
@@ -192,7 +196,6 @@ def send_gmail(subject: str = "default", message: str = "default",
                         info["app_password"] = pwd
             except:
                 print('You have to specify app password.')
-    print(info.keys())
     ######
     session = smtplib.SMTP('smtp.gmail.com', 587)
     session.starttls()
@@ -203,7 +206,7 @@ def send_gmail(subject: str = "default", message: str = "default",
     msg['Subject'] = info["subject"]
     session.sendmail(info["from_gmail"], info["to_gmail"], msg.as_string())
 
-    # 세션 종료
+    # session end
     session.quit()
 
 
@@ -221,6 +224,7 @@ def pkl_dump(obj, save_path='./', name=None, verbose=True):
 
 
 def pkl_load(load_path='./saved_data.pkl', verbose=True):
+    '''load data from dumped pickle'''
     with open(load_path, 'rb') as f:
         data = pickle.load(f)
     if verbose:
@@ -240,13 +244,35 @@ if __name__ == '__main__':
     print(f'{x=}')
 
     pkl_dump(x, name=f'{x=}'.split('=')[0])
-    # with open('./keys_hash/kanari.txt') as f:
-    #     a = f.readlines()
-    #     print(a[-1].split('\n')[0])
-    # mkdir('./ex_folder')
-    # send_gmail('ex_subtitle.', 'ex_content')
     print(get_weeknum())
 
     x = torch.randn(32)
     x = torch.clip(x, 0, 1)
     print(x)
+    # mkdir('./ex_folder')
+
+    with open('./keys_hash/kanari.txt') as f:
+        a = f.readlines()
+        print(a[-1].split('\n')[0])
+    # send_gmail('급여명세서 줘.', '여깄습니다')
+
+    data_transforms = {
+        'train': transforms.Compose([
+            transforms.Resize(224),
+            transforms.ToTensor(),
+        ]),
+        'val': transforms.Compose([
+            transforms.Resize(224),
+            transforms.ToTensor(),
+        ]),
+    }
+    data_dir = 'data/hymenoptera_data'
+    image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
+                                              data_transforms[x])
+                      for x in ['train', 'val']}
+    dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1,
+                                                  shuffle=True, num_workers=4)
+                   for x in ['train', 'val']}
+
+    print(calculate_mean_var(image_datasets['train']))
+    print(calculate_mean_var(image_datasets['val']))
