@@ -90,6 +90,43 @@ def calculate_mean_var(dataloader):
     return total_mean, total_std
 
 
+def get_mean_image(dataloader):
+    '''Calculate mean and var from dataloader'''
+    idx = 0
+    mean_images = []
+    if dataloader.batch_size != 1:
+        print('please set batch size to 1')
+        return
+
+    for inputs, *label in dataloader:  # [tensor(1)]
+        if idx == 0:
+            print('the input size is: ', inputs.size())
+            sum_each_cls = {}
+            num_each_cls = {}
+        if (label_num := label[0].item()) not in sum_each_cls:
+            sum_each_cls[label_num] = torch.zeros_like(inputs)
+            num_each_cls[label_num] = 0
+        sum_each_cls[label_num] += inputs
+        num_each_cls[label_num] += 1
+        idx += 1
+    for label_idx in num_each_cls:
+        mean_images.append([sum_each_cls[label_idx] / num_each_cls[label_idx], label_idx])
+    from IPython import embed
+    embed()
+    return mean_images
+
+
+def cvplot(cvimg):
+    cvimg = cv2.cvtColor(cvimg, cv2.COLOR_BGR2RGB)
+    plt.figure()
+    plt.imshow(cvimg)
+
+
+def toplot(tensor):
+    plt.figure()
+    plt.imshow(tensor.permute(1, 2, 0))
+
+
 def make_beep_sound_intel_mac(phrase: str):
     # make sound in mac!!
     os.system(f'say {phrase}')
@@ -121,10 +158,6 @@ def torch_to_image(inp, title=None):
     if title is not None:
         plt.title(title)
     plt.pause(0.001)  # pause a bit so that plots are updated
-
-
-def numpy_to_image():
-    pass
 
 
 def load_np_img(fname: str, mode='RGB', return_orig=False):
@@ -278,7 +311,7 @@ if __name__ == '__main__':
 
     data_transforms = {
         'train': transforms.Compose([
-            transforms.Resize(224),
+            transforms.Resize((224, 224)),
             transforms.ToTensor(),
         ]),
         'val': transforms.Compose([
@@ -290,9 +323,23 @@ if __name__ == '__main__':
     image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                               data_transforms[x])
                       for x in ['train', 'val']}
+    image_datasets = {}
+
+    image_datasets['train'] = datasets.CIFAR100('data/cifar', True, data_transforms['train'], download=True)
+    image_datasets['val'] = datasets.CIFAR100('data/cifar', False, data_transforms['val'], download=True)
     dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1,
                                                   shuffle=True, num_workers=4)
                    for x in ['train', 'val']}
 
-    print(calculate_mean_var(image_datasets['train']))
-    print(calculate_mean_var(image_datasets['val']))
+    # print(calculate_mean_var(image_datasets['train']))
+    # print(calculate_mean_var(image_datasets['val']))
+
+    target_machines = [
+        f"ml-{i}"
+        for i in range(3, 8)
+    ]
+    print(target_machines)
+    mean_ls = get_mean_image(dataloaders['train'])
+    torch_to_image(mean_ls[0][0].squeeze())
+    from IPython import embed
+    embed()
