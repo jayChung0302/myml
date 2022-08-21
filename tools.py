@@ -18,6 +18,8 @@ import cv2
 import numpy as np
 from omegaconf import OmegaConf
 import yaml
+import json
+import urllib
 from datetime import datetime
 from PIL import Image
 import tqdm
@@ -117,14 +119,19 @@ def get_mean_image(dataloader):
 
 
 def cvplot(cvimg):
+    '''Plot opencv format image'''
     cvimg = cv2.cvtColor(cvimg, cv2.COLOR_BGR2RGB)
     plt.figure()
     plt.imshow(cvimg)
 
 
 def toplot(tensor):
+    '''Plot torch tensor format image'''
+    # TODO: handle batch image
+    assert len(size := tensor.size()) <= 4
+
     plt.figure()
-    plt.imshow(tensor.permute(1, 2, 0))
+    plt.imshow(tensor.squeeze().permute(1, 2, 0))
 
 
 def make_beep_sound_intel_mac(phrase: str):
@@ -145,6 +152,31 @@ def calculate_kl_loss(y_true, y_pred):
 def mkdir(dir_path, exist_ok=False):
     '''Make dir except for not exist'''
     os.makedirs(dir_path, exist_ok=exist_ok)
+
+
+def read_json(file_path):
+    '''Read json file from file_path'''
+    with open(file_path, 'r') as f:
+        json_data = json.load(f)
+    return json_data
+
+
+def url2image(url):
+    '''Read content from url and decode to image'''
+    content = urllib.urlopen(url)
+    image = np.asarray(bytearray(content.read()), dtype="uint8")
+    image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+    return image
+
+
+def find_files(path_dir, format=None):
+    '''Find defined format files from path_dir'''
+    file_list = os.listdir(path_dir)
+    if not format:
+        return file_list
+    else:
+        file_list_ = [file for file in file_list if file.endswith(format)]
+        return file_list_
 
 
 def torch_to_image(inp, title=None):
