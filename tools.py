@@ -1,7 +1,7 @@
 '''
 code & scrap ML-related functions or objects
 '''
-
+# %%
 
 from distutils.log import info
 from re import S, sub
@@ -113,8 +113,6 @@ def get_mean_image(dataloader):
         idx += 1
     for label_idx in num_each_cls:
         mean_images.append([sum_each_cls[label_idx] / num_each_cls[label_idx], label_idx])
-    from IPython import embed
-    embed()
     return mean_images
 
 
@@ -204,8 +202,18 @@ def load_np_img(fname: str, mode='RGB', return_orig=False):
         return out_img
 
 
-def normalize():
-    pass
+def inverse_normalize(img_tensor, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):
+    """un-normalize input tensor"""
+    img_tensor[..., 0] = img_tensor[..., 0] * std[0] + mean[0]
+    img_tensor[..., 1] = img_tensor[..., 1] * std[1] + mean[1]
+    img_tensor[..., 2] = img_tensor[..., 2] * std[2] + mean[2]
+    return img_tensor
+
+
+def normalize(img_tensor, mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]):
+    normalize_transform = transforms.Normalize(mean=mean, std=std)
+    norm_img_tensor = normalize_transform(img_tensor)
+    return norm_img_tensor
 
 
 def parse_all_img(query_dir):
@@ -371,7 +379,10 @@ if __name__ == '__main__':
         for i in range(3, 8)
     ]
     print(target_machines)
-    mean_ls = get_mean_image(dataloaders['train'])
-    torch_to_image(mean_ls[0][0].squeeze())
-    from IPython import embed
-    embed()
+    # mean_ls = get_mean_image(dataloaders['train'])
+    # torch_to_image(mean_ls[0][0].squeeze())
+# %%
+    x = torch.randn(3, 32, 32)
+    torch_to_image(x)
+
+# %%
