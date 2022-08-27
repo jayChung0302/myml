@@ -25,6 +25,8 @@ from PIL import Image
 import tqdm
 # from google.colab import files # 설치안됨(m1?)
 
+# __all__ = []
+
 
 def get_today() -> List:
     '''Get today's year, month, day information list'''
@@ -126,6 +128,19 @@ def cvplot(cvimg):
     plt.figure()
     plt.axis('off')
     plt.imshow(cvimg)
+
+
+def maskplot(mask_layouts: list, num_display: int = 4):
+    '''
+    Plot mask output 
+    mask_layouts : list, [(N, H, W)]
+    '''
+    total_num = len(mask_layouts)
+    plt.figure(figsize=(32, 32))
+    for idx, mask in enumerate(mask_layouts):
+        plt.subplot(total_num // num_display + 1, num_display, idx + 1)
+        plt.axis('off')
+        plt.imshow(mask, cmap='gray')
 
 
 def toplot(tensor):
@@ -359,6 +374,7 @@ def pkl_load(load_path='./saved_data.pkl', verbose=True):
     return data
 
 
+# %%
 if __name__ == '__main__':
     import pickle
     x = {}
@@ -395,10 +411,9 @@ if __name__ == '__main__':
     image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                               data_transforms[x])
                       for x in ['train', 'val']}
-    image_datasets = {}
 
-    image_datasets['train'] = datasets.CIFAR100('data/cifar', True, data_transforms['train'], download=True)
-    image_datasets['val'] = datasets.CIFAR100('data/cifar', False, data_transforms['val'], download=True)
+    # image_datasets['train'] = datasets.CIFAR100('data/cifar', True, data_transforms['train'], download=True)
+    # image_datasets['val'] = datasets.CIFAR100('data/cifar', False, data_transforms['val'], download=True)
     dataloaders = {x: torch.utils.data.DataLoader(image_datasets[x], batch_size=1,
                                                   shuffle=True, num_workers=4)
                    for x in ['train', 'val']}
@@ -411,24 +426,7 @@ if __name__ == '__main__':
         for i in range(3, 8)
     ]
     print(target_machines)
-    mean_ls = get_mean_image(dataloaders['train'])
-    # torch_to_image(mean_ls[0][0].squeeze())
-    '''
-    #정리
-    sum = torch.zeros(100, 3, 32, 32)
-    num_lst = torch.tensor([0] * 100)
-    for i, data in enumerate(dataloaders['train']):
-        x, y = data
-        sum[y] += x
-        num_lst[y] += 1
-    mean = torch.zeros_like(sum)
-    for i, num in enumerate(num_lst):
-        mean[i] = sum[i] / num
-    to_pil = transforms.ToPILImage()
+    mean_ls = get_mean_image(dataloaders['train'])  # get mean image
+    torch_to_image(mean_ls[0][0].squeeze())
 
-    img_ls = []
-    for i in range(10):
-        mean_pil = to_pil(mean[i])
-        img_ls.append(mean_pil)
-        mean_pil.save(f'./img/mean_{i}.png')
-    '''
+# %%
