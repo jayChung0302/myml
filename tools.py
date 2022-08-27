@@ -22,7 +22,8 @@ import json
 import urllib
 from datetime import datetime
 from PIL import Image
-import tqdm
+from tqdm import tqdm
+import time
 # from google.colab import files # 설치안됨(m1?)
 
 # __all__ = []
@@ -143,13 +144,18 @@ def maskplot(mask_layouts: list, num_display: int = 4):
         plt.imshow(mask, cmap='gray')
 
 
-def toplot(tensor):
+def toplot(tensor: torch.Tensor, num_display: int = 4):
     '''Plot torch tensor format image'''
-    # TODO: handle batch image
+    norm_range(tensor)
     assert len(size := tensor.size()) <= 4
-
-    plt.figure()
-    plt.imshow(tensor.squeeze().permute(1, 2, 0))
+    # plt.figure(figsize=(32, 32))
+    if len(size) == 4:
+        for idx in range(size[0]):
+            plt.subplot(size[0] // num_display + 1, num_display, idx + 1)
+            plt.axis('off')
+            plt.imshow(tensor[idx].permute(1, 2, 0))
+    else:
+        plt.imshow(tensor.squeeze().permute(1, 2, 0))
 
 
 def make_beep_sound_intel_mac(phrase: str):
@@ -159,6 +165,18 @@ def make_beep_sound_intel_mac(phrase: str):
     import os
     os.system('afplay /System/Library/Sounds/Sosumi.aiff')
     return
+
+
+def norm_ip(img, min, max):
+    img.clamp_(min=min, max=max)
+    img.add_(-min).div_(max - min + 1e-5)
+
+
+def norm_range(x: torch.Tensor, range=None):
+    if range is not None:
+        norm_ip(x, range[0], range[1])
+    else:
+        norm_ip(x, float(x.min()), float(x.max()))
 
 
 def calculate_kl_loss(y_true, y_pred):
@@ -222,6 +240,15 @@ def find_files(path_dir, format=None):
     else:
         file_list_ = [file for file in file_list if file.endswith(format)]
         return file_list_
+
+
+def timeit(func):
+    def measure_time(*args, **kwargs):
+        start = time.time()
+        output = func(*args, **kwargs)
+        print(time.time() - start, '초 걸렸습니다.')
+        return output
+    return measure_time
 
 
 def torch_to_image(inp, title=None):
