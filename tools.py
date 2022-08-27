@@ -111,8 +111,12 @@ def get_mean_image(dataloader):
         sum_each_cls[label_num] += inputs
         num_each_cls[label_num] += 1
         idx += 1
+    to_pil = transforms.ToPILImage()
     for label_idx in num_each_cls:
+        mean = [sum_each_cls[label_idx] / num_each_cls[label_idx], label_idx]
         mean_images.append([sum_each_cls[label_idx] / num_each_cls[label_idx], label_idx])
+        mean_pil = to_pil(mean[0].squeeze())
+        mean_pil.save(f'./img/mean2_{label_idx}.png')
     return mean_images
 
 
@@ -120,6 +124,7 @@ def cvplot(cvimg):
     '''Plot opencv format image'''
     cvimg = cv2.cvtColor(cvimg, cv2.COLOR_BGR2RGB)
     plt.figure()
+    plt.axis('off')
     plt.imshow(cvimg)
 
 
@@ -157,6 +162,33 @@ def read_json(file_path):
     with open(file_path, 'r') as f:
         json_data = json.load(f)
     return json_data
+
+
+def straight_line(cur_xy, before_xy, min_thresh=15):
+    '''
+    Input: curent and before two dimensional coordinate pairs
+    Straight polygon line.
+    min_thresh: min threshold for the other coordinate's minimum variation
+    out: correct 1 pixel(cause of round) and ignore circular polygon coordinates
+    '''
+    cur_x, cur_y = cur_xy
+    before_x, before_y = before_xy
+    diff_x = cur_x - before_x
+    diff_y = cur_y - before_y
+    if abs(diff_x) == 1:
+        if abs(diff_y) > min_thresh:
+            if diff_x > 0:
+                cur_x -= 1
+            else:
+                cur_x += 1
+
+    if abs(diff_y) == 1:
+        if abs(diff_x) > min_thresh:
+            if diff_y > 0:
+                cur_y -= 1
+            else:
+                cur_y += 1
+    return [cur_x, cur_y]
 
 
 def url2image(url):
@@ -351,11 +383,11 @@ if __name__ == '__main__':
 
     data_transforms = {
         'train': transforms.Compose([
-            transforms.Resize((224, 224)),
+            transforms.Resize((32, 32)),
             transforms.ToTensor(),
         ]),
         'val': transforms.Compose([
-            transforms.Resize(224),
+            transforms.Resize(32),
             transforms.ToTensor(),
         ]),
     }
@@ -379,10 +411,24 @@ if __name__ == '__main__':
         for i in range(3, 8)
     ]
     print(target_machines)
-    # mean_ls = get_mean_image(dataloaders['train'])
+    mean_ls = get_mean_image(dataloaders['train'])
     # torch_to_image(mean_ls[0][0].squeeze())
-# %%
-    x = torch.randn(3, 32, 32)
-    torch_to_image(x)
+    '''
+    #정리
+    sum = torch.zeros(100, 3, 32, 32)
+    num_lst = torch.tensor([0] * 100)
+    for i, data in enumerate(dataloaders['train']):
+        x, y = data
+        sum[y] += x
+        num_lst[y] += 1
+    mean = torch.zeros_like(sum)
+    for i, num in enumerate(num_lst):
+        mean[i] = sum[i] / num
+    to_pil = transforms.ToPILImage()
 
-# %%
+    img_ls = []
+    for i in range(10):
+        mean_pil = to_pil(mean[i])
+        img_ls.append(mean_pil)
+        mean_pil.save(f'./img/mean_{i}.png')
+    '''
