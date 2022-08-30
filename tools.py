@@ -146,7 +146,7 @@ def maskplot(mask_layouts: list, num_display: int = 4):
 
 def toplot(tensor: torch.Tensor, num_display: int = 4):
     '''Plot torch tensor format image'''
-    norm_range(tensor)
+    norm_ip(tensor)
     assert len(size := tensor.size()) <= 4
     # plt.figure(figsize=(32, 32))
     if len(size) == 4:
@@ -167,16 +167,13 @@ def make_beep_sound_intel_mac(phrase: str):
     return
 
 
-def norm_ip(img, min, max):
-    img.clamp_(min=min, max=max)
-    img.add_(-min).div_(max - min + 1e-5)
-
-
-def norm_range(x: torch.Tensor, range=None):
-    if range is not None:
-        norm_ip(x, range[0], range[1])
-    else:
-        norm_ip(x, float(x.min()), float(x.max()))
+def norm_ip(tensor_img, min=None, max=None):
+    if not min:
+        min = tensor_img.min()
+    if not max:
+        max = tensor_img.max()
+    tensor_img.clamp_(min=min, max=max)
+    tensor_img.add_(-min).div_(max - min + 1e-5)
 
 
 def calculate_kl_loss(y_true, y_pred):
