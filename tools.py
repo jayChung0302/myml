@@ -419,7 +419,7 @@ if __name__ == '__main__':
     with open('./keys_hash/kanari.txt') as f:
         a = f.readlines()
         print(a[-1].split('\n')[0])
-    # send_gmail('급여명세서 줘.', '여깄습니다')
+    # send_gmail('급여명세서 줘.', 'ㅇㅇ')
 
     data_transforms = {
         'train': transforms.Compose([
@@ -453,4 +453,14 @@ if __name__ == '__main__':
     mean_ls = get_mean_image(dataloaders['train'])  # get mean image
     torch_to_image(mean_ls[0][0].squeeze())
 
-# %%
+
+def load_model(args, model, optimizer):
+    assert os.path.exisits(args.path)
+
+    print(f'Loading from {args.path}...')
+    checkpoint = torch.load(args.path)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    epoch = checkpoint['epoch']
+
+    return epoch
