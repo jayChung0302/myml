@@ -5,7 +5,6 @@ code & scrap ML-related functions or objects
 
 from distutils.log import info
 from re import S, sub
-from select import kevent
 import smtplib
 from email.mime.text import MIMEText
 import os
