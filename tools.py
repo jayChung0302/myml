@@ -396,6 +396,16 @@ def pkl_load(load_path='./saved_data.pkl', verbose=True):
         print(f'{name} - load complete!')
     return data
 
+def load_model(args, model, optimizer):
+    assert os.path.exisits(args.path)
+
+    print(f'Loading from {args.path}...')
+    checkpoint = torch.load(args.path)
+    model.load_state_dict(checkpoint['model_state_dict'])
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
+    epoch = checkpoint['epoch']
+
+    return epoch
 
 # %%
 if __name__ == '__main__':
@@ -453,13 +463,4 @@ if __name__ == '__main__':
     torch_to_image(mean_ls[0][0].squeeze())
 
 
-def load_model(args, model, optimizer):
-    assert os.path.exisits(args.path)
 
-    print(f'Loading from {args.path}...')
-    checkpoint = torch.load(args.path)
-    model.load_state_dict(checkpoint['model_state_dict'])
-    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-    epoch = checkpoint['epoch']
-
-    return epoch
